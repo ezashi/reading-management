@@ -1,11 +1,11 @@
 <% content_for :title, "新規登録" %>
 
-<div>
-    <h1>新規登録</h1>
+<div class="form-container">
+    <h1 class="form-title">新規登録</h1>
 
     <%= form_with model: @user, url: signup_path, local: true do |form| %>
     <% if @user.errors.any? %>
-    <div>
+    <div class="error-messages">
         <ul>
             <% @user.errors.full_messages.each do |message| %>
             <li><%= message %></li>
@@ -14,28 +14,29 @@
     </div>
     <% end %>
 
-    <div>
-        <%= form.label :username, "ユーザー名" %>
-        <%= form.text_field :username, required: true %>
+    <div class="form-group">
+        <%= form.label :username, "ユーザー名", class: "form-label" %>
+        <%= form.text_field :username, required: true, class: "form-input" %>
     </div>
 
-    <div>
-        <%= form.label :email, "メールアドレス" %>
-        <%= form.email_field :email, required: true %>
+    <div class="form-group">
+        <%= form.label :email, "メールアドレス", class: "form-label" %>
+        <%= form.email_field :email, required: true, class: "form-input" %>
     </div>
 
-    <div>
-        <%= form.label :password, "パスワード" %>
-        <%= form.password_field :password, required: true %>
+    <div class="form-group">
+        <%= form.label :password, "パスワード", class: "form-label" %>
+        <%= form.password_field :password, required: true, class: "form-input" %>
+        <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">6文字以上で入力してください</p>
     </div>
 
-    <div>
-        <%= form.submit "登録する" %>
+    <div class="form-actions">
+        <%= form.submit "登録する", class: "btn btn-primary" %>
     </div>
     <% end %>
 
-    <div>
-        <p>すでにアカウントをお持ちですか？</p>
-        <%= link_to "ログインはこちら", login_path %>
+    <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e5e7eb;">
+        <p style="color: #6b7280; margin-bottom: 1rem;">すでにアカウントをお持ちですか？</p>
+        <%= link_to "ログインはこちら", login_path, class: "btn btn-secondary" %>
     </div>
 </div>

@@ -1,70 +1,75 @@
 <% content_for :title, "#{@book.title} - 編集" %>
 
-<div>
-    <div>
-        <%= link_to "← 戻る", @book %>
-        <h1>本を編集</h1>
+<div class="form-container">
+    <!-- 戻るボタン -->
+    <div style="margin-bottom: 1rem;">
+        <%= link_to @book, class: "btn btn-secondary" do %>
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+        </svg>
+        戻る
+        <% end %>
     </div>
 
-    <div>
-        <%= form_with model: @book, local: true do |form| %>
-        <% if @book.errors.any? %>
-        <div>
-            <ul>
-                <% @book.errors.full_messages.each do |message| %>
-                <li><%= message %></li>
-                <% end %>
-            </ul>
-        </div>
-        <% end %>
+    <h1 class="form-title">本を編集</h1>
 
-        <div>
-            <%= form.label :title, "タイトル" %>
-            <%= form.text_field :title, required: true %>
-        </div>
-
-        <div>
-            <%= form.label :author, "著者" %>
-            <%= form.text_field :author %>
-        </div>
-
-        <div>
-            <%= form.label :publisher, "出版社" %>
-            <%= form.text_field :publisher %>
-        </div>
-
-        <div>
-            <%= form.label :cover_image_url, "表紙画像URL" %>
-            <%= form.url_field :cover_image_url %>
-            <% if @book.cover_image_url.present? %>
-            <div>
-                <p>現在の画像:</p>
-                <img src="<%= @book.cover_image_url %>" alt="<%= @book.title %>">
-            </div>
+    <%= form_with model: @book, local: true do |form| %>
+    <% if @book.errors.any? %>
+    <div class="error-messages">
+        <ul>
+            <% @book.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
             <% end %>
-        </div>
+        </ul>
+    </div>
+    <% end %>
 
-        <div>
-            <%= form.label :rating, "評価" %>
-            <%= form.select :rating, options_for_select([
-              ['未評価', nil],
-              ['★☆☆☆☆ (1)', 1],
-              ['★★☆☆☆ (2)', 2],
-              ['★★★☆☆ (3)', 3],
-              ['★★★★☆ (4)', 4],
-              ['★★★★★ (5)', 5]
-        ], @book.rating) %>
-        </div>
+    <div class="form-group">
+        <%= form.label :title, "タイトル", class: "form-label" %>
+        <%= form.text_field :title, required: true, class: "form-input" %>
+    </div>
 
-        <div>
-            <%= form.label :memo, "メモ・感想" %>
-            <%= form.text_area :memo, rows: 6, placeholder: "読んだ感想や印象に残った部分を記録しましょう..." %>
-        </div>
+    <div class="form-group">
+        <%= form.label :author, "著者", class: "form-label" %>
+        <%= form.text_field :author, class: "form-input" %>
+    </div>
 
-        <div>
-            <%= form.submit "更新" %>
-            <%= link_to "キャンセル", @book %>
+    <div class="form-group">
+        <%= form.label :publisher, "出版社", class: "form-label" %>
+        <%= form.text_field :publisher, class: "form-input" %>
+    </div>
+
+    <div class="form-group">
+        <%= form.label :cover_image_url, "表紙画像URL", class: "form-label" %>
+        <%= form.url_field :cover_image_url, class: "form-input" %>
+        <% if @book.cover_image_url.present? %>
+        <div style="margin-top: 0.5rem;">
+            <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.5rem;">現在の画像:</p>
+            <img src="<%= @book.cover_image_url %>" alt="<%= @book.title %>" style="width: 100px; height: auto; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
         </div>
         <% end %>
     </div>
+
+    <div class="form-group">
+        <%= form.label :rating, "評価", class: "form-label" %>
+        <%= form.select :rating, options_for_select([
+                ['未評価', nil],
+                ['★☆☆☆☆ (1)', 1],
+                ['★★☆☆☆ (2)', 2],
+                ['★★★☆☆ (3)', 3],
+                ['★★★★☆ (4)', 4],
+                ['★★★★★ (5)', 5]
+            ], @book.rating), {}, { class: "form-select" } %>
+    </div>
+
+    <div class="form-group">
+        <%= form.label :memo, "メモ・感想", class: "form-label" %>
+        <%= form.text_area :memo, rows: 6, placeholder: "読んだ感想や印象に残った部分を記録しましょう...", class: "form-textarea" %>
+    </div>
+
+    <div class="form-actions">
+        <%= form.submit "更新", class: "btn btn-primary" %>
+        <%= link_to "キャンセル", @book, class: "btn btn-secondary" %>
+    </div>
+    <% end %>
 </div>

@@ -25,39 +25,50 @@
 
 <body>
     <!-- ナビゲーション -->
-    <nav>
-        <div>
-            <div>
-                <div>
-                    <%= link_to "読書管理", root_path %>
-                </div>
+    <nav class="navbar">
+        <div class="navbar-container container">
+            <div class="navbar-brand">
+                <%= link_to root_path, class: "navbar-brand" do %>
+                読書管理
+                <% end %>
+            </div>
 
-                <div>
-                    <% if logged_in? %>
-                    <%= link_to "本を追加", new_book_path %>
-                    <%= link_to "ログアウト", logout_path, method: :delete %>
-                    <% else %>
-                    <%= link_to "ログイン", login_path %>
-                    <%= link_to "新規登録", signup_path %>
-                    <% end %>
-                </div>
+            <div class="navbar-nav">
+                <% if logged_in? %>
+                <%= link_to new_book_path, class: "btn btn-primary" do %>
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                </svg>
+                本を追加
+                <% end %>
+
+                <%= form_with url: logout_path, method: :delete, local: true, style: "display: inline;" do |form| %>
+                <%= form.submit "ログアウト", class: "btn btn-secondary" %>
+                <% end %>
+                <% else %>
+                <%= link_to "ログイン", login_path, class: "btn btn-primary" %>
+                <%= link_to "新規登録", signup_path, class: "btn btn-secondary" %>
+                <% end %>
             </div>
         </div>
     </nav>
 
     <!-- フラッシュメッセージ -->
-    <% if flash[:notice] %>
-    <div>
-        <%= flash[:notice] %>
-    </div>
-    <% end %>
+    <div class="container">
+        <% if flash[:notice] %>
+        <div class="flash notice">
+            <%= flash[:notice] %>
+        </div>
+        <% end %>
 
-    <% if flash[:alert] %>
-    <div>
-        <%= flash[:alert] %>
+        <% if flash[:alert] %>
+        <div class="flash alert">
+            <%= flash[:alert] %>
+        </div>
+        <% end %>
     </div>
-    <% end %>
-    <main class="container mx-auto mt-28 px-5 flex">
+
+    <main class="container">
         <%= yield %>
     </main>
 </body>
