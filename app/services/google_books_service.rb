@@ -18,14 +18,14 @@ class GoogleBooksService
   end
 
   def search(query, start_index = 0, max_results = 10)
-    Rails.logger.info "=== Search Request Debug ==="
+    Rails.logger.info "=== Google Books Service Debug ==="
     Rails.logger.info "Query: '#{query}'"
     Rails.logger.info "Start index: #{start_index}"
     Rails.logger.info "Max results: #{max_results}"
-    
+    Rails.logger.info "API key present: #{@api_key.present?}"
+
     return empty_result(max_results) if query.blank?
 
-    # APIキーがある場合は追加
     params = {
       q: query,
       startIndex: start_index,
@@ -34,27 +34,40 @@ class GoogleBooksService
     params[:key] = @api_key if @api_key.present?
 
     uri = build_uri(params)
-    Rails.logger.info "Request URL: #{uri}"
+    Rails.logger.info "Request URL: #{uri.to_s.gsub(@api_key.to_s, '[API_KEY_HIDDEN]')}"
 
     begin
       response = make_request(uri)
       Rails.logger.info "Response code: #{response.code}"
-      Rails.logger.info "Response headers: #{response.to_hash}"
-      
+      Rails.logger.info "Response message: #{response.message}"
+
       if response.code == '200'
         Rails.logger.info "Response body length: #{response.body.length}"
-        Rails.logger.info "Response body preview: #{response.body[0..200]}..."
-        
+
+        # レスポンスボディの最初の部分をログ出力
+        body_preview = response.body[0..500]
+        Rails.logger.info "Response body preview: #{body_preview}..."
+
         data = JSON.parse(response.body)
         Rails.logger.info "Parsed data keys: #{data.keys}"
         Rails.logger.info "Total items: #{data['totalItems']}"
+        Rails.logger.info "Items array present: #{data['items'].present?}"
         Rails.logger.info "Items count: #{data['items']&.length || 0}"
-        
-        process_response(data, start_index, max_results)
+
+        if data['items']&.any?
+          first_item = data['items'].first
+          Rails.logger.info "First item keys: #{first_item.keys}"
+          Rails.logger.info "First item volume_info: #{first_item['volumeInfo']&.keys}"
+        end
+
+        result = process_response(data, start_index, max_results)
+        Rails.logger.info "Final result: #{result}"
+
+        return result
       else
         Rails.logger.error "Google Books API Error: #{response.code} - #{response.message}"
-        Rails.logger.error "Response body: #{response.body}" if response.body
-        
+        Rails.logger.error "Response body: #{response.body}"
+
         # エラーレスポンスを詳細に調査
         if response.body.present?
           begin
@@ -64,36 +77,36 @@ class GoogleBooksService
             Rails.logger.error "Could not parse error response as JSON"
           end
         end
-        
-        empty_result(max_results)
+
+        return empty_result(max_results)
       end
     rescue JSON::ParserError => e
       Rails.logger.error "JSON Parse Error: #{e.message}"
       Rails.logger.error "Response body: #{response.body}"
-      empty_result(max_results)
+      return empty_result(max_results)
     rescue => e
       Rails.logger.error "Google Books API error: #{e.class.name} - #{e.message}"
       Rails.logger.error "Backtrace: #{e.backtrace.first(10).join("\n")}"
-      empty_result(max_results)
+      return empty_result(max_results)
     end
   end
 
   # シンプルなテスト用メソッド
   def test_connection
     Rails.logger.info "=== Testing Google Books API Connection ==="
-    
+
     # 最もシンプルなクエリでテスト
     test_query = "ruby"
     params = { q: test_query, maxResults: 1 }
     params[:key] = @api_key if @api_key.present?
-    
+
     uri = build_uri(params)
     Rails.logger.info "Test URL: #{uri}"
-    
+
     begin
       response = make_request(uri)
       Rails.logger.info "Test response code: #{response.code}"
-      
+
       if response.code == '200'
         data = JSON.parse(response.body)
         Rails.logger.info "Test successful - Total items: #{data['totalItems']}"
@@ -117,7 +130,7 @@ class GoogleBooksService
 
   def make_request(uri)
     Rails.logger.info "Making HTTP request to: #{uri.host}:#{uri.port}"
-    
+
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     http.open_timeout = 10
@@ -129,12 +142,12 @@ class GoogleBooksService
     request = Net::HTTP::Get.new(uri)
     request['User-Agent'] = 'ReadingManagement/1.0'
     request['Accept'] = 'application/json'
-    
+
     Rails.logger.info "Request headers: #{request.to_hash}"
 
     response = http.request(request)
     Rails.logger.info "Response received: #{response.class.name}"
-    
+
     response
   end
 

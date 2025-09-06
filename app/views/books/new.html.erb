@@ -243,7 +243,6 @@
             }
         }
 
-        // メインのページ番号ボタン
         for (let i = startPage; i <= endPage; i++) {
             if (i === pagination.current_page) {
                 html += `<button class="pagination-btn active">${i}</button>`;
@@ -252,7 +251,6 @@
             }
         }
 
-        // 最後のページへのリンク（省略記号付き）
         if (endPage < pagination.total_pages) {
             if (endPage < pagination.total_pages - 1) {
                 html += `<span class="pagination-ellipsis">...</span>`;
@@ -260,7 +258,6 @@
             html += `<button class="pagination-btn" onclick="searchBooks(${pagination.total_pages})">${pagination.total_pages}</button>`;
         }
 
-        // 次のページボタン
         if (pagination.has_next) {
             html += `<button class="pagination-btn pagination-btn-next" onclick="searchBooks(${pagination.current_page + 1})">
                 次へ
@@ -279,129 +276,6 @@
 
         paginationDiv.innerHTML = html;
         paginationDiv.style.display = 'flex';
-    }
-
-    function displayPaginationInfo(pagination) {
-        const paginationInfo = document.getElementById('pagination-info');
-
-        if (pagination.total_items === 0) {
-            paginationInfo.style.display = 'none';
-            return;
-        }
-
-        const startItem = pagination.start_index + 1;
-        const endItem = Math.min(pagination.start_index + pagination.items_per_page, pagination.total_items);
-
-        paginationInfo.innerHTML = `${startItem}〜${endItem}件 / 全${pagination.total_items}件`;
-        paginationInfo.style.display = 'block';
-    }
-    1
-    })
-    ">
-    次へ
-        <
-        svg class = "w-4 h-4"
-    fill = "currentColor"
-    viewBox = "0 0 20 20" >
-        <
-        path fill - rule = "evenodd"
-    d = "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-    clip - rule = "evenodd" / >
-        <
-        /svg> < /
-    button > `;
-    }
-    else {
-        html += ` < button class = "pagination-btn pagination-btn-next"
-    disabled >
-        次へ <
-        svg class = "w-4 h-4"
-    fill = "currentColor"
-    viewBox = "0 0 20 20" >
-        <
-        path fill - rule = "evenodd"
-    d = "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-    clip - rule = "evenodd" / >
-        <
-        /svg> < /
-    button > `;
-    }
-
-    paginationDiv.innerHTML = html;
-    paginationDiv.style.display = 'flex';
-    }
-
-    function displayPaginationInfo(pagination) {
-        const paginationInfo = document.getElementById('pagination-info');
-
-        if (pagination.total_items === 0) {
-            paginationInfo.style.display = 'none';
-            return;
-        }
-
-        const startItem = pagination.start_index + 1;
-        const endItem = Math.min(pagination.start_index + pagination.items_per_page, pagination.total_items);
-
-        let totalItemsText = `
-    全$ {
-        pagination.total_items
-    }
-    件`;
-        if (pagination.api_total_items && pagination.api_total_items > pagination.total_items) {
-            totalItemsText += `（
-    約$ {
-        pagination.api_total_items
-    }
-    件から`;
-        }
-
-        paginationInfo.innerHTML = `
-    $ {
-        startItem
-    }〜
-    $ {
-        endItem
-    }
-    件 / $ {
-        totalItemsText
-    }
-    `;
-        paginationInfo.style.display = 'block';
-    }
-    1
-    })
-    ">
-    次へ
-        <
-        svg class = "w-4 h-4"
-    fill = "currentColor"
-    viewBox = "0 0 20 20" >
-        <
-        path fill - rule = "evenodd"
-    d = "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-    clip - rule = "evenodd" / >
-        <
-        /svg> < /
-        button > `;
-    }
-    else {
-        html += ` < button class = "pagination-btn pagination-btn-next"
-    disabled >
-        次へ <
-        svg class = "w-4 h-4"
-    fill = "currentColor"
-    viewBox = "0 0 20 20" >
-        <
-        path fill - rule = "evenodd"
-    d = "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-    clip - rule = "evenodd" / >
-        <
-        /svg> <
-        /button>`;
-    }
-
-    paginationDiv.innerHTML = html;
-    paginationDiv.style.display = 'flex';
     }
 
     function displayPaginationInfo(pagination) {
