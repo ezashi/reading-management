@@ -25,7 +25,13 @@
                 検索
             </button>
         </div>
-        <div id="search-results" class="search-results"></div>
+
+        <!-- 検索結果をページネーション -->
+        <div class="search-results-container">
+            <div id="search-results" class="search-results"></div>
+            <div id="search-pagination" class="pagination" style="display: none;"></div>
+            <div id="pagination-info" class="pagination-info" style="display: none;"></div>
+        </div>
     </div>
 
     <!-- 手動入力フォーム -->
@@ -89,48 +95,328 @@
 </div>
 
 <script>
-    async function searchBooks() {
+    let currentQuery = '';
+    let currentPage = 1;
+    let totalPages = 0;
+    let isLoading = false;
+
+    async function searchBooks(page = 1) {
         const query = document.getElementById('search-input').value.trim();
         const resultsDiv = document.getElementById('search-results');
+        const paginationDiv = document.getElementById('search-pagination');
+        const paginationInfo = document.getElementById('pagination-info');
 
         if (!query) {
-            resultsDiv.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 1rem;">検索キーワードを入力してください</p>';
+            resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">🔍</div><p>検索キーワードを入力してください</p></div>';
+            paginationDiv.style.display = 'none';
+            paginationInfo.style.display = 'none';
             return;
         }
 
-        resultsDiv.innerHTML = '<div class="loading"><div class="loading-spinner"></div>検索中...</div>';
+        if (isLoading) return;
+
+        isLoading = true;
+        currentQuery = query;
+        currentPage = page;
+
+        const startIndex = (page - 1) * 10;
+
+        resultsDiv.innerHTML = '<div class="search-results-loading"><div class="loading"><div class="loading-spinner"></div>検索中...</div></div>';
+        paginationDiv.style.display = 'none';
+        paginationInfo.style.display = 'none';
 
         try {
-            const response = await fetch(`/books/search_external?query=${encodeURIComponent(query)}`);
-            const books = await response.json();
+            const response = await fetch(`/books/search_external?query=${encodeURIComponent(query)}&start_index=${startIndex}`);
+            const data = await response.json();
 
-            if (books.length === 0) {
-                resultsDiv.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 1rem;">検索結果が見つかりませんでした</p>';
+            if (data.items.length === 0 && page > 1) {
+                console.log('No results found for page', page, ', going back to page', page - 1);
+                searchBooks(page - 1);
                 return;
             }
 
-            let html = '';
-            books.forEach(book => {
-                html += `
-                    <div class="search-result" onclick="selectBook('${book.title.replace(/'/g, "\\'")}', '${book.authors.replace(/'/g, "\\'")}', '${book.publisher.replace(/'/g, "\\'")}', '${book.cover_image}')">
-                        <div class="search-result-content">
-                            <div class="search-result-cover">
-                                ${book.cover_image ? `<img src="${book.cover_image}" alt="${book.title}">` : '📖'}
-                            </div>
-                            <div class="search-result-info">
-                                <h3 class="search-result-title">${book.title}</h3>
-                                <p class="search-result-author">著者: ${book.authors}</p>
-                                <p class="search-result-publisher">出版社: ${book.publisher}</p>
-                            </div>
+            if (data.items.length === 0 && page === 1) {
+                resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">📚</div><p>検索結果が見つかりませんでした</p></div>';
+                paginationDiv.style.display = 'none';
+                paginationInfo.style.display = 'none';
+                return;
+            }
+
+            displaySearchResults(data.items);
+
+            totalPages = data.pagination.total_pages;
+
+            if (data.items.length < 10 && data.pagination.current_page > 1) {
+                totalPages = data.pagination.current_page;
+                data.pagination.total_pages = totalPages;
+                data.pagination.has_next = false;
+            }
+
+            displayPagination(data.pagination);
+            displayPaginationInfo(data.pagination);
+
+        } catch (error) {
+            console.error('Search error:', error);
+            resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">⚠️</div><p>検索中にエラーが発生しました</p></div>';
+            paginationDiv.style.display = 'none';
+            paginationInfo.style.display = 'none';
+        } finally {
+            isLoading = false;
+        }
+    }
+
+    function displaySearchResults(books) {
+        const resultsDiv = document.getElementById('search-results');
+
+        if (books.length === 0) {
+            resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">📚</div><p>このページに結果がありません</p></div>';
+            return;
+        }
+
+        let html = '';
+        books.forEach(book => {
+            html += `
+                <div class="search-result" onclick="selectBook('${escapeHtml(book.title)}', '${escapeHtml(book.authors)}', '${escapeHtml(book.publisher)}', '${escapeHtml(book.cover_image)}')">
+                    <div class="search-result-content">
+                        <div class="search-result-cover">
+                            ${book.cover_image ? `<img src="${book.cover_image}" alt="${escapeHtml(book.title)}">` : '📖'}
+                        </div>
+                        <div class="search-result-info">
+                            <h3 class="search-result-title">${escapeHtml(book.title)}</h3>
+                            <p class="search-result-author">著者: ${escapeHtml(book.authors)}</p>
+                            <p class="search-result-publisher">出版社: ${escapeHtml(book.publisher)}</p>
                         </div>
                     </div>
-                `;
-            });
+                </div>
+            `;
+        });
 
-            resultsDiv.innerHTML = html;
-        } catch (error) {
-            resultsDiv.innerHTML = '<p style="color: #dc2626; text-align: center; padding: 1rem;">検索中にエラーが発生しました</p>';
+        resultsDiv.innerHTML = html;
+    }
+
+    function displayPagination(pagination) {
+        const paginationDiv = document.getElementById('search-pagination');
+
+        if (pagination.total_pages <= 1) {
+            paginationDiv.style.display = 'none';
+            return;
         }
+
+        let html = '';
+
+        if (pagination.has_prev) {
+            html += `<button class="pagination-btn pagination-btn-prev" onclick="searchBooks(${pagination.current_page - 1})">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                前へ
+            </button>`;
+        } else {
+            html += `<button class="pagination-btn pagination-btn-prev" disabled>
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                前へ
+            </button>`;
+        }
+
+        const maxVisiblePages = 5;
+        let startPage, endPage;
+
+        if (pagination.total_pages <= maxVisiblePages) {
+            startPage = 1;
+            endPage = pagination.total_pages;
+        } else {
+            const half = Math.floor(maxVisiblePages / 2);
+            startPage = Math.max(1, pagination.current_page - half);
+            endPage = Math.min(pagination.total_pages, startPage + maxVisiblePages - 1);
+
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+        }
+
+        if (startPage > 1) {
+            html += `<button class="pagination-btn" onclick="searchBooks(1)">1</button>`;
+            if (startPage > 2) {
+                html += `<span class="pagination-ellipsis">...</span>`;
+            }
+        }
+
+        // メインのページ番号ボタン
+        for (let i = startPage; i <= endPage; i++) {
+            if (i === pagination.current_page) {
+                html += `<button class="pagination-btn active">${i}</button>`;
+            } else {
+                html += `<button class="pagination-btn" onclick="searchBooks(${i})">${i}</button>`;
+            }
+        }
+
+        // 最後のページへのリンク（省略記号付き）
+        if (endPage < pagination.total_pages) {
+            if (endPage < pagination.total_pages - 1) {
+                html += `<span class="pagination-ellipsis">...</span>`;
+            }
+            html += `<button class="pagination-btn" onclick="searchBooks(${pagination.total_pages})">${pagination.total_pages}</button>`;
+        }
+
+        // 次のページボタン
+        if (pagination.has_next) {
+            html += `<button class="pagination-btn pagination-btn-next" onclick="searchBooks(${pagination.current_page + 1})">
+                次へ
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                </svg>
+            </button>`;
+        } else {
+            html += `<button class="pagination-btn pagination-btn-next" disabled>
+                次へ
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                </svg>
+            </button>`;
+        }
+
+        paginationDiv.innerHTML = html;
+        paginationDiv.style.display = 'flex';
+    }
+
+    function displayPaginationInfo(pagination) {
+        const paginationInfo = document.getElementById('pagination-info');
+
+        if (pagination.total_items === 0) {
+            paginationInfo.style.display = 'none';
+            return;
+        }
+
+        const startItem = pagination.start_index + 1;
+        const endItem = Math.min(pagination.start_index + pagination.items_per_page, pagination.total_items);
+
+        paginationInfo.innerHTML = `${startItem}〜${endItem}件 / 全${pagination.total_items}件`;
+        paginationInfo.style.display = 'block';
+    }
+    1
+    })
+    ">
+    次へ
+        <
+        svg class = "w-4 h-4"
+    fill = "currentColor"
+    viewBox = "0 0 20 20" >
+        <
+        path fill - rule = "evenodd"
+    d = "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+    clip - rule = "evenodd" / >
+        <
+        /svg> < /
+    button > `;
+    }
+    else {
+        html += ` < button class = "pagination-btn pagination-btn-next"
+    disabled >
+        次へ <
+        svg class = "w-4 h-4"
+    fill = "currentColor"
+    viewBox = "0 0 20 20" >
+        <
+        path fill - rule = "evenodd"
+    d = "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+    clip - rule = "evenodd" / >
+        <
+        /svg> < /
+    button > `;
+    }
+
+    paginationDiv.innerHTML = html;
+    paginationDiv.style.display = 'flex';
+    }
+
+    function displayPaginationInfo(pagination) {
+        const paginationInfo = document.getElementById('pagination-info');
+
+        if (pagination.total_items === 0) {
+            paginationInfo.style.display = 'none';
+            return;
+        }
+
+        const startItem = pagination.start_index + 1;
+        const endItem = Math.min(pagination.start_index + pagination.items_per_page, pagination.total_items);
+
+        let totalItemsText = `
+    全$ {
+        pagination.total_items
+    }
+    件`;
+        if (pagination.api_total_items && pagination.api_total_items > pagination.total_items) {
+            totalItemsText += `（
+    約$ {
+        pagination.api_total_items
+    }
+    件から`;
+        }
+
+        paginationInfo.innerHTML = `
+    $ {
+        startItem
+    }〜
+    $ {
+        endItem
+    }
+    件 / $ {
+        totalItemsText
+    }
+    `;
+        paginationInfo.style.display = 'block';
+    }
+    1
+    })
+    ">
+    次へ
+        <
+        svg class = "w-4 h-4"
+    fill = "currentColor"
+    viewBox = "0 0 20 20" >
+        <
+        path fill - rule = "evenodd"
+    d = "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+    clip - rule = "evenodd" / >
+        <
+        /svg> < /
+        button > `;
+    }
+    else {
+        html += ` < button class = "pagination-btn pagination-btn-next"
+    disabled >
+        次へ <
+        svg class = "w-4 h-4"
+    fill = "currentColor"
+    viewBox = "0 0 20 20" >
+        <
+        path fill - rule = "evenodd"
+    d = "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+    clip - rule = "evenodd" / >
+        <
+        /svg> <
+        /button>`;
+    }
+
+    paginationDiv.innerHTML = html;
+    paginationDiv.style.display = 'flex';
+    }
+
+    function displayPaginationInfo(pagination) {
+        const paginationInfo = document.getElementById('pagination-info');
+
+        if (pagination.total_items === 0) {
+            paginationInfo.style.display = 'none';
+            return;
+        }
+
+        const startItem = pagination.start_index + 1;
+        const endItem = Math.min(pagination.start_index + pagination.items_per_page, pagination.total_items);
+
+        paginationInfo.innerHTML = `${startItem}〜${endItem}件 / 全${pagination.total_items}件`;
+        paginationInfo.style.display = 'block';
     }
 
     function selectBook(title, authors, publisher, coverImage) {
@@ -143,12 +429,37 @@
         document.getElementById('book_title').scrollIntoView({
             behavior: 'smooth'
         });
+
+        // 選択したことを視覚的に示す
+        const selectedMessage = document.createElement('div');
+        selectedMessage.innerHTML = '✅ 本が選択されました';
+        selectedMessage.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #10b981; color: white; padding: 12px 20px; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+        document.body.appendChild(selectedMessage);
+
+        setTimeout(() => {
+            selectedMessage.remove();
+        }, 3000);
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     // Enterキーで検索
     document.getElementById('search-input').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
-            searchBooks();
+            searchBooks(1);
+        }
+    });
+
+    // 検索入力をクリアしたときの処理
+    document.getElementById('search-input').addEventListener('input', function(e) {
+        if (e.target.value.trim() === '') {
+            document.getElementById('search-results').innerHTML = '';
+            document.getElementById('search-pagination').style.display = 'none';
+            document.getElementById('pagination-info').style.display = 'none';
         }
     });
 </script>

@@ -46,15 +46,59 @@ class BooksController < ApplicationController
 
   def search_external
     query = params[:query]
-    if query.present?
-      # Google Books APIを使用した外部検索
-      books_service = GoogleBooksService.new
-      @search_results = books_service.search(query)
-    else
-      @search_results = []
-    end
+    start_index = params[:start_index]&.to_i || 0
+    max_results = 10
 
-    render json: @search_results
+    if query.present?
+      books_service = GoogleBooksService.new
+      search_results = books_service.search(query, start_index, max_results)
+
+      current_page = (start_index / max_results) + 1
+      total_pages = (search_results[:total_items].to_f / max_results).ceil
+
+      is_last_page = search_results[:items].length < max_results || 
+                     start_index + max_results >= search_results[:total_items]
+
+
+      has_next = search_results[:has_more_results] && !is_last_page
+
+      has_prev = start_index > 0
+
+      if search_results[:items].empty? && current_page > 1
+        total_pages = current_page - 1
+        has_next = false
+      end
+
+      render json: {
+        items: search_results[:items],
+        pagination: {
+          total_items: search_results[:total_items],
+          start_index: search_results[:start_index],
+          items_per_page: search_results[:items_per_page],
+          current_page: current_page,
+          total_pages: total_pages,
+          has_next: has_next,
+          has_prev: has_prev,
+          api_total_items: search_results[:api_total_items],
+          is_last_page: is_last_page
+        }
+      }
+    else
+      render json: {
+        items: [],
+        pagination: {
+          total_items: 0,
+          start_index: 0,
+          items_per_page: max_results,
+          current_page: 1,
+          total_pages: 0,
+          has_next: false,
+          has_prev: false,
+          api_total_items: 0,
+          is_last_page: true
+        }
+      }
+    end
   end
 
   private
