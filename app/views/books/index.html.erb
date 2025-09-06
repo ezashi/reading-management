@@ -1,0 +1,61 @@
+<% content_for :title, "読了一覧" %>
+
+<div>
+    <h1>読了一覧</h1>
+    <%= link_to "本を追加", new_book_path %>
+</div>
+
+<!-- 検索フォーム -->
+<div>
+    <%= form_with url: books_path, method: :get, local: true do |form| %>
+    <%= form.text_field :search, value: @search_query, placeholder: "本のタイトルで検索" %>
+    <%= form.submit "検索" %>
+    <% if @search_query.present? %>
+    <%= link_to "クリア", books_path %>
+    <% end %>
+    <% end %>
+</div>
+
+<% if @search_query.present? %>
+<p>「<%= @search_query %>」の検索結果: <%= @books.count %>件</p>
+<% end %>
+
+<!-- 本の一覧 -->
+<% if @books.any? %>
+<div>
+    <% @books.each do |book| %>
+    <div>
+        <% if book.cover_image_url.present? %>
+        <div>
+            <%= link_to book do %>
+            <img src="<%= book.cover_image_url %>" alt="<%= book.title %>">
+            <% end %>
+        </div>
+        <% else %>
+        <div>
+            <span>No image</span>
+        </div>
+        <% end %>
+
+        <div>
+            <h3>
+                <%= link_to book.title, book %>
+
+
+                <% if book.author.present? %>
+                <p>
+                    <%= link_to "著者: #{book.author}", book %>
+                </p>
+                <% end %>
+            </h3>
+        </div>
+    </div>
+    <% end %>
+</div>
+<% else %>
+<div>
+    <div>📚</div>
+    <h3>まだ本が登録されていません</h3>
+    <p>
+</div>
+<% end %>

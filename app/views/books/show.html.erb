@@ -1,0 +1,115 @@
+<% content_for :title, @book.title %>
+
+<div>
+    <div>
+        <%= link_to "← 戻る", books_path %>
+        <h1>本の詳細</h1>
+    </div>
+
+    <div>
+        <div>
+            <!-- 表紙画像 -->
+            <div>
+                <% if @book.cover_image_url.present? %>
+                <img src="<%= @book.cover_image_url %>" alt="<%= @book.title %>">
+                <% else %>
+                <div>
+                    <span>No image</span>
+                </div>
+                <% end %>
+            </div>
+
+            <!-- 本の情報 -->
+            <div>
+                <div>
+                    <div>
+                        <h2><%= @book.title %></h2>
+
+                        <% if @book.author.present? %>
+                        <p>
+                            <span>著者:</span> <%= @book.author %>
+                        </p>
+                        <% end %>
+
+                        <% if @book.publisher.present? %>
+                        <p>
+                            <span>出版社:</span> <%= @book.publisher %>
+                        </p>
+                        <% end %>
+
+                        <p>
+                            <span>追加日:</span> <%= @book.created_at.strftime("%Y年%m月%d日") %>
+                        </p>
+                    </div>
+
+                    <!-- 評価 -->
+                    <% if @book.rating.present? %>
+                    <div>
+                        <h3>評価</h3>
+                        <div>
+                            <% @book.rating.times do %>
+                            <span>★</span>
+                            <% end %>
+                            <% (5 - @book.rating).times do %>
+                            <span>☆</span>
+                            <% end %>
+                            <span>(<%= @book.rating %>/5)</span>
+                        </div>
+                    </div>
+                    <% end %>
+
+                    <!-- メモ・感想 -->
+                    <% if @book.memo.present? %>
+                    <div>
+                        <h3>メモ・感想</h3>
+                        <div>
+                            <p><%= @book.memo %></p>
+                        </div>
+                    </div>
+                    <% end %>
+
+                    <!-- アクションボタン -->
+                    <div>
+                        <%= link_to "編集", edit_book_path(@book) %>
+                        <%= link_to "削除", @book, method: :delete %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最近追加した本 -->
+    <div>
+        <h3>最近追加した本</h3>
+        <% recent_books = current_user.books.recent.limit(4).where.not(id: @book.id) %>
+
+        <% if recent_books.any? %>
+        <div>
+            <% recent_books.each do |book| %>
+            <div>
+                <% if book.cover_image_url.present? %>
+                <div>
+                    <img src="<%= book.cover_image_url %>" alt="<%= book.title %>">
+                </div>
+                <% else %>
+                <div>
+                    <span>📖</span>
+                </div>
+                <% end %>
+
+                <div>
+                    <h4>
+                        <%= link_to book.title, book %>
+                    </h4>
+                    <% if book.author.present? %>
+                    <p><%= book.author %></p>
+                    <% end %>
+                </div>
+            </div>
+            <% end %>
+        </div>
+        <% else %>
+        <p>他に本がありません</p>
+        <% end %>
+    </div>
+</div>

@@ -1,0 +1,146 @@
+<% content_for :title, "本を追加" %>
+
+<div>
+    <div>
+        <%= link_to "← 戻る", books_path %>
+        <h1>本を追加</h1>
+    </div>
+
+    <!-- 外部検索セクション -->
+    <div>
+        <h2>本を検索</h2>
+        <div>
+            <input type="text" id="search-input" placeholder="タイトル、著者を入力して検索">
+            <button onclick="searchBooks()">
+                検索
+            </button>
+        </div>
+
+        <div id="search-results"></div>
+    </div>
+
+    <!-- 手動入力フォーム -->
+    <div>
+        <h2>手動で入力</h2>
+
+        <%= form_with model: @book, local: true do |form| %>
+        <% if @book.errors.any? %>
+        <div>
+            <ul>
+                <% @book.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+                <% end %>
+            </ul>
+        </div>
+        <% end %>
+
+        <div>
+            <%= form.label :title, "タイトル" %>
+            <%= form.text_field :title, required: true %>
+        </div>
+
+        <div>
+            <%= form.label :author, "著者" %>
+            <%= form.text_field :author %>
+        </div>
+
+        <div>
+            <%= form.label :publisher, "出版社" %>
+            <%= form.text_field :publisher %>
+        </div>
+
+        <div>
+            <%= form.label :cover_image_url, "表紙画像URL" %>
+            <%= form.url_field :cover_image_url %>
+        </div>
+
+        <div>
+            <%= form.label :rating, "評価" %>
+            <%= form.select :rating, options_for_select([
+              ['未評価', nil],
+              ['★☆☆☆☆ (1)', 1],
+              ['★★☆☆☆ (2)', 2],
+              ['★★★☆☆ (3)', 3],
+              ['★★★★☆ (4)', 4],
+              ['★★★★★ (5)', 5]
+        ]) %>
+        </div>
+
+        <div>
+            <%= form.label :memo, "メモ・感想" %>
+            <%= form.text_area :memo, rows: 4, placeholder: "読んだ感想や印象に残った部分を記録しましょう..." %>
+        </div>
+
+        <div>
+            <%= form.submit "保存" %>
+            <%= link_to "キャンセル", books_path %>
+        </div>
+        <% end %>
+    </div>
+</div>
+
+<script>
+    async function searchBooks() {
+        const query = document.getElementById('search-input').value.trim();
+        const resultsDiv = document.getElementById('search-results');
+
+        if (!query) {
+            resultsDiv.innerHTML = '<p>検索キーワードを入力してください</p>';
+            return;
+        }
+
+        resultsDiv.innerHTML = '<p>検索中...</p>';
+
+        try {
+            const response = await fetch(`/books/search_external?query=${encodeURIComponent(query)}`);
+            const books = await response.json();
+
+            if (books.length === 0) {
+                resultsDiv.innerHTML = '<p>検索結果が見つかりませんでした</p>';
+                return;
+            }
+
+            let html = '<div>';
+            books.forEach(book => {
+                html += `
+        <div onclick="selectBook('${book.title}', '${book.authors}', '${book.publisher}', '${book.cover_image}')">
+          <div>
+            <div>
+              ${book.cover_image ? `<img src="${book.cover_image}" alt="${book.title}">` : '📖'}
+            </div>
+            <div>
+              <h3>${book.title}</h3>
+              <p>著者: ${book.authors}</p>
+              <p>出版社: ${book.publisher}</p>
+            </div>
+          </div>
+        </div>
+      `;
+            });
+            html += '</div>';
+
+            resultsDiv.innerHTML = html;
+        } catch (error) {
+            resultsDiv.innerHTML = '<p>検索中にエラーが発生しました</p>';
+        }
+    }
+
+    function selectBook(title, authors, publisher, coverImage) {
+        document.getElementById('book_title').value = title;
+        document.getElementById('book_author').value = authors;
+        document.getElementById('book_publisher').value = publisher;
+        document.getElementById('book_cover_image_url').value = coverImage;
+
+        // スクロールしてフォームを表示
+        document.getElementById('book_title').scrollIntoView({
+            behavior: 'smooth'
+        });
+    }
+
+    // Enterキーで検索
+    document.getElementById('search-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchBooks();
+        }
+    });
+</script>

@@ -34,7 +34,6 @@
 
                 <div>
                     <% if logged_in? %>
-                    <span>こんにちは、<%= current_user.username %>さん</span>
                     <%= link_to "本を追加", new_book_path %>
                     <%= link_to "ログアウト", logout_path, method: :delete %>
                     <% else %>
