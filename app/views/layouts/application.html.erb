@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title><%= content_for(:title) || "読書管理システム" %></title>
+    <title><%= content_for(:title) || "読書管理" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -11,66 +11,70 @@
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
 </head>
 
 <body>
-    <!-- ナビゲーション -->
-    <nav class="navbar">
-        <div class="navbar-container container">
-            <div class="navbar-brand">
-                <%= link_to root_path, class: "navbar-brand" do %>
-                読書管理
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <%= link_to root_path, class: "brand-link" do %>
+                <span class="brand-icon">☕</span>
+                <span class="brand-text">コーヒーと本と猫</span>
                 <% end %>
             </div>
 
-            <div class="navbar-nav">
+            <div class="nav-menu">
                 <% if logged_in? %>
-                <%= link_to new_book_path, class: "btn btn-primary" do %>
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                </svg>
+                <%= link_to new_book_path, class: "nav-button primary" do %>
+                <span class="button-icon">📚</span>
                 本を追加
                 <% end %>
 
-                <%= form_with url: logout_path, method: :delete, local: true, style: "display: inline;" do |form| %>
-                <%= form.submit "ログアウト", class: "btn btn-secondary" %>
+                <%= form_with url: logout_path, method: :delete, local: true, class: "logout-form" do |form| %>
+                <%= form.submit "ログアウト", class: "nav-button secondary" %>
                 <% end %>
                 <% else %>
-                <%= link_to "ログイン", login_path, class: "btn btn-primary" %>
-                <%= link_to "新規登録", signup_path, class: "btn btn-secondary" %>
+                <%= link_to "ログイン", login_path, class: "nav-button primary" %>
+                <%= link_to "新規登録", signup_path, class: "nav-button secondary" %>
                 <% end %>
             </div>
         </div>
     </nav>
 
-    <!-- フラッシュメッセージ -->
-    <div class="container">
+    <div class="page-container">
         <% if flash[:notice] %>
         <div class="flash notice">
+            <span class="flash-icon">✅</span>
             <%= flash[:notice] %>
         </div>
         <% end %>
 
         <% if flash[:alert] %>
         <div class="flash alert">
+            <span class="flash-icon">⚠️</span>
             <%= flash[:alert] %>
         </div>
         <% end %>
     </div>
 
-    <main class="container">
+    <main class="main-content">
         <%= yield %>
     </main>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <p class="footer-text">
+                <span class="footer-icon">🐾</span>
+                読書と共に過ごす、温かなひととき
+            </p>
+        </div>
+    </footer>
 </body>
 
 </html>

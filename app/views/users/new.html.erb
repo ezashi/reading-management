@@ -1,42 +1,53 @@
 <% content_for :title, "新規登録" %>
 
-<div class="form-container">
-    <h1 class="form-title">新規登録</h1>
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1 class="auth-title">新しい読書仲間になりませんか？</h1>
+            <p class="auth-subtitle">本とコーヒーと猫のいる温かな空間へ</p>
+        </div>
 
-    <%= form_with model: @user, url: signup_path, local: true do |form| %>
-    <% if @user.errors.any? %>
-    <div class="error-messages">
-        <ul>
-            <% @user.errors.full_messages.each do |message| %>
-            <li><%= message %></li>
-            <% end %>
-        </ul>
-    </div>
-    <% end %>
+        <%= form_with model: @user, url: signup_path, local: true, class: "auth-form" do |form| %>
+        <% if @user.errors.any? %>
+        <div class="error-card">
+            <div class="error-header">
+                <span class="error-icon">🚫</span>
+                <span class="error-title">入力内容をご確認ください</span>
+            </div>
+            <ul class="error-list">
+                <% @user.errors.full_messages.each do |message| %>
+                <li class="error-item"><%= message %></li>
+                <% end %>
+            </ul>
+        </div>
+        <% end %>
 
-    <div class="form-group">
-        <%= form.label :username, "ユーザー名", class: "form-label" %>
-        <%= form.text_field :username, required: true, class: "form-input" %>
-    </div>
+        <div class="form-group">
+            <%= form.label :username, "ユーザー名", class: "form-label" %>
+            <%= form.text_field :username, required: true, class: "form-input", placeholder: "例：bookworm123" %>
+        </div>
 
-    <div class="form-group">
-        <%= form.label :email, "メールアドレス", class: "form-label" %>
-        <%= form.email_field :email, required: true, class: "form-input" %>
-    </div>
+        <div class="form-group">
+            <%= form.label :email, "メールアドレス", class: "form-label" %>
+            <%= form.email_field :email, required: true, class: "form-input", placeholder: "例：reader@example.com" %>
+        </div>
 
-    <div class="form-group">
-        <%= form.label :password, "パスワード", class: "form-label" %>
-        <%= form.password_field :password, required: true, class: "form-input" %>
-        <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">6文字以上で入力してください</p>
-    </div>
+        <div class="form-group">
+            <%= form.label :password, "パスワード", class: "form-label" %>
+            <%= form.password_field :password, required: true, class: "form-input", placeholder: "6文字以上" %>
+            <p class="form-hint">安全のため6文字以上でお設定ください</p>
+        </div>
 
-    <div class="form-actions">
-        <%= form.submit "登録する", class: "btn btn-primary" %>
-    </div>
-    <% end %>
+        <div class="form-actions">
+            <%= form.submit "アカウント作成", class: "submit-button primary" %>
+        </div>
+        <% end %>
 
-    <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e5e7eb;">
-        <p style="color: #6b7280; margin-bottom: 1rem;">すでにアカウントをお持ちですか？</p>
-        <%= link_to "ログインはこちら", login_path, class: "btn btn-secondary" %>
+        <div class="auth-footer">
+            <p class="auth-switch">
+                すでにアカウントをお持ちですか？
+                <%= link_to "ログインはこちら", login_path, class: "auth-link" %>
+            </p>
+        </div>
     </div>
 </div>

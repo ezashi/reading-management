@@ -2,7 +2,6 @@ class BooksController < ApplicationController
   before_action :require_login, except: [ :search_external ]
   before_action :set_book, only: [ :show, :edit, :update, :destroy ]
 
-
   def index
     @books = current_user.books.recent
     @books = @books.by_title(params[:search]) if params[:search].present?
@@ -46,61 +45,115 @@ class BooksController < ApplicationController
   end
 
   def search_external
-    Rails.logger.info "=== Books Controller search_external ==="
-    Rails.logger.info "Params: #{params.inspect}"
-    Rails.logger.info "Session user_id: #{session[:user_id]}"
-    Rails.logger.info "Current user present: #{current_user.present?}"
-
     query = params[:query]
     start_index = params[:start_index]&.to_i || 0
     max_results = 10
 
-    Rails.logger.info "Query: '#{query}'"
-    Rails.logger.info "Start index: #{start_index}"
-    Rails.logger.info "Max results: #{max_results}"
-
     if query.present?
       books_service = GoogleBooksService.new
-      Rails.logger.info "Created GoogleBooksService instance"
 
-      search_results = books_service.search(query, start_index, max_results)
-      Rails.logger.info "Search results from service: #{search_results.inspect}"
+      # 空のページをスキップして結果を取得
+      collected_items = []
+      current_start_index = start_index
+      attempts = 0
+      max_attempts = 5
 
-      current_page = (start_index / max_results) + 1
-      total_pages = (search_results[:total_items].to_f / max_results).ceil
+      while collected_items.length < max_results && attempts < max_attempts
+        search_results = books_service.search(query, current_start_index, max_results * 2)
 
-      is_last_page = search_results[:items].length < max_results ||
-                     start_index + max_results >= search_results[:total_items]
+        if search_results[:items].empty?
+          break
+        end
 
-      has_next = search_results[:has_more_results] && !is_last_page
-      has_prev = start_index > 0
+        remaining_needed = max_results - collected_items.length
+        new_items = search_results[:items].take(remaining_needed)
+        collected_items.concat(new_items)
 
-      if search_results[:items].empty? && current_page > 1
-        total_pages = current_page - 1
-        has_next = false
+        current_start_index += search_results[:items].length
+        attempts += 1
       end
 
+      if collected_items.empty?
+        metadata_result = books_service.search(query, start_index, max_results)
+        search_results = metadata_result
+      else
+        metadata_result = books_service.search(query, 0, 1)
+        search_results = {
+          items: collected_items,
+          total_items: metadata_result[:total_items],
+          start_index: start_index,
+          items_per_page: max_results,
+          api_total_items: metadata_result[:api_total_items],
+          has_more_results: metadata_result[:has_more_results]
+        }
+      end
+
+      current_page = (start_index / max_results) + 1
+      actual_total_items = search_results[:total_items]
+      max_google_items = 1000
+      effective_total_items = [ actual_total_items, max_google_items ].min
+      estimated_total_pages = (effective_total_items.to_f / max_results).ceil
+      estimated_total_pages = [ estimated_total_pages, 1 ].max
+
+      if collected_items.empty?
+        if current_page == 1
+          response_data = {
+            items: [],
+            pagination: {
+              total_items: 0,
+              start_index: start_index,
+              items_per_page: max_results,
+              current_page: current_page,
+              total_pages: 0,
+              has_next: false,
+              has_prev: false,
+              api_total_items: 0,
+              is_last_page: true
+            }
+          }
+        else
+          response_data = {
+            items: [],
+            pagination: {
+              total_items: start_index,
+              start_index: start_index,
+              items_per_page: max_results,
+              current_page: current_page,
+              total_pages: current_page - 1,
+              has_next: false,
+              has_prev: current_page > 1,
+              api_total_items: search_results[:api_total_items],
+              is_last_page: true,
+              end_of_results: true
+            }
+          }
+        end
+
+        render json: response_data
+        return
+      end
+
+      has_next = collected_items.length == max_results &&
+                 start_index + max_results < effective_total_items
+      has_prev = current_page > 1
+
       response_data = {
-        items: search_results[:items],
+        items: collected_items,
         pagination: {
-          total_items: search_results[:total_items],
-          start_index: search_results[:start_index],
-          items_per_page: search_results[:items_per_page],
+          total_items: effective_total_items,
+          start_index: start_index,
+          items_per_page: max_results,
           current_page: current_page,
-          total_pages: total_pages,
+          total_pages: estimated_total_pages,
           has_next: has_next,
           has_prev: has_prev,
           api_total_items: search_results[:api_total_items],
-          is_last_page: is_last_page
+          is_last_page: !has_next
         }
       }
 
-      Rails.logger.info "Final response data: #{response_data.inspect}"
-
       render json: response_data
     else
-      Rails.logger.info "Empty query, returning empty result"
-
       render json: {
         items: [],
         pagination: {
@@ -118,7 +171,6 @@ class BooksController < ApplicationController
     end
   rescue => e
     Rails.logger.error "Error in search_external: #{e.class.name} - #{e.message}"
-    Rails.logger.error "Backtrace: #{e.backtrace.first(10).join("\n")}"
 
     render json: {
       items: [],

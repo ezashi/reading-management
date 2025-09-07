@@ -1,147 +1,156 @@
-<% content_for :title, "本を追加" %>
+<% content_for :title, "本を追加 - コーヒーと本と猫" %>
 
-<div class="form-container">
-    <!-- 戻るボタン -->
-    <div style="margin-bottom: 1rem;">
-        <%= link_to books_path, class: "btn btn-secondary" do %>
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-        </svg>
+<div class="add-book-page">
+    <div class="back-navigation">
+        <%= link_to books_path, class: "back-button" do %>
+        <span class="back-icon">←</span>
         戻る
         <% end %>
     </div>
 
-    <h1 class="form-title">本を追加</h1>
+    <div class="add-book-header">
+        <h1 class="add-book-title">新しい本を追加</h1>
+        <p class="add-book-subtitle">読み終わった本を記録しましょう</p>
+    </div>
 
-    <!-- 外部検索セクション -->
-    <div class="external-search">
-        <h2 class="external-search-title">本を検索</h2>
+    <div class="search-books-section">
+        <div class="search-books-card">
+            <h2 class="search-books-title">
+                <span class="search-icon">🔍</span>
+                本を検索
+            </h2>
 
-        <!-- 検索のヒント -->
-        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.875rem; color: #1e40af;">
-            <strong>💡 検索のコツ:</strong>
-            <ul style="margin: 0.5rem 0 0 1rem; padding: 0;">
-                <li>「"Harry Potter"」のように引用符で囲むと完全一致検索</li>
-                <li>「村上春樹 ノルウェイ」のように著者名と作品名を組み合わせる</li>
-                <li>「Ruby プログラミング」のようにジャンルとキーワードを組み合わせる</li>
-            </ul>
-        </div>
-
-        <div class="external-search-form">
-            <input type="text" id="search-input" placeholder="例: &quot;ハリー・ポッター&quot;、村上春樹、Ruby プログラミング" class="external-search-input">
-            <button onclick="safeSearch(1)" class="btn btn-primary">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                </svg>
-                検索
-            </button>
-        </div>
-
-        <!-- 人気検索例 -->
-        <div style="margin-bottom: 1rem;">
-            <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.5rem;">人気の検索例:</p>
-            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                <button onclick="searchExample('&quot;ハリー・ポッター&quot;')" class="search-example-btn">ハリー・ポッター</button>
-                <button onclick="searchExample('村上春樹')" class="search-example-btn">村上春樹</button>
-                <button onclick="searchExample('&quot;鬼滅の刃&quot;')" class="search-example-btn">鬼滅の刃</button>
-                <button onclick="searchExample('Python プログラミング')" class="search-example-btn">Python入門</button>
-                <button onclick="searchExample('東野圭吾')" class="search-example-btn">東野圭吾</button>
+            <div class="search-tips">
+                <p class="tips-title">💡 検索のコツ:</p>
+                <ul class="tips-list">
+                    <li>「"ハリー・ポッター"」のように引用符で囲むと完全一致検索</li>
+                    <li>「村上春樹 ノルウェイ」のように著者名と作品名を組み合わせる</li>
+                    <li>「Ruby プログラミング」のようにジャンルとキーワードを組み合わせる</li>
+                </ul>
             </div>
-        </div>
 
-        <!-- 検索結果をページネーション -->
-        <div class="search-results-container">
-            <div id="search-results" class="search-results"></div>
-            <div id="search-pagination" class="pagination" style="display: none;"></div>
-            <div id="pagination-info" class="pagination-info" style="display: none;"></div>
+            <div class="search-form">
+                <input type="text" id="search-input" placeholder="例: &quot;ハリー・ポッター&quot;、村上春樹、Ruby プログラミング" class="search-input">
+                <button onclick="safeSearch(1)" class="search-button">
+                    <span class="button-icon">🔍</span>
+                    検索
+                </button>
+            </div>
+
+            <div class="search-examples">
+                <p class="examples-title">人気の検索例:</p>
+                <div class="examples-buttons">
+                    <button onclick="searchExample('&quot;ハリー・ポッター&quot;')" class="example-button">ハリー・ポッター</button>
+                    <button onclick="searchExample('村上春樹')" class="example-button">村上春樹</button>
+                    <button onclick="searchExample('&quot;鬼滅の刃&quot;')" class="example-button">鬼滅の刃</button>
+                    <button onclick="searchExample('Python プログラミング')" class="example-button">Python入門</button>
+                    <button onclick="searchExample('東野圭吾')" class="example-button">東野圭吾</button>
+                </div>
+            </div>
+
+            <div class="search-results-container">
+                <div id="search-results" class="search-results"></div>
+                <div id="search-pagination" class="search-pagination"></div>
+                <div id="pagination-info" class="pagination-info"></div>
+            </div>
         </div>
     </div>
 
-    <!-- 手動入力フォーム -->
-    <div style="background: white; border-radius: 1rem; padding: 1.5rem; border: 1px solid #e5e7eb;">
-        <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; color: #1f2937;">手動で入力</h2>
+    <div class="manual-form-section">
+        <div class="manual-form-card">
+            <h2 class="manual-form-title">
+                <span class="form-icon">✏️</span>
+                手動で入力
+            </h2>
 
-        <%= form_with model: @book, local: true do |form| %>
-        <% if @book.errors.any? %>
-        <div class="error-messages">
-            <ul>
-                <% @book.errors.full_messages.each do |message| %>
-                <li><%= message %></li>
+            <%= form_with model: @book, local: true, class: "book-form" do |form| %>
+            <% if @book.errors.any? %>
+            <div class="error-card">
+                <div class="error-header">
+                    <span class="error-icon">🚫</span>
+                    <span class="error-title">入力内容をご確認ください</span>
+                </div>
+                <ul class="error-list">
+                    <% @book.errors.full_messages.each do |message| %>
+                    <li class="error-item"><%= message %></li>
+                    <% end %>
+                </ul>
+            </div>
+            <% end %>
+
+            <div class="form-group">
+                <%= form.label :title, "タイトル", class: "form-label" %>
+                <%= form.text_field :title, required: true, class: "form-input", placeholder: "本のタイトルを入力" %>
+            </div>
+
+            <div class="form-group">
+                <%= form.label :author, "著者", class: "form-label" %>
+                <%= form.text_field :author, class: "form-input", placeholder: "著者名を入力" %>
+            </div>
+
+            <div class="form-group">
+                <%= form.label :publisher, "出版社", class: "form-label" %>
+                <%= form.text_field :publisher, class: "form-input", placeholder: "出版社名を入力" %>
+            </div>
+
+            <div class="form-group">
+                <%= form.label :cover_image_url, "表紙画像URL", class: "form-label" %>
+                <%= form.url_field :cover_image_url, class: "form-input", placeholder: "https://..." %>
+                <% if @book.cover_image_url.present? %>
+                <div class="current-image">
+                    <p class="current-image-label">現在の画像:</p>
+                    <img src="<%= @book.cover_image_url %>" alt="<%= @book.title %>" class="current-image-preview">
+                </div>
                 <% end %>
-            </ul>
-        </div>
-        <% end %>
+            </div>
 
-        <div class="form-group">
-            <%= form.label :title, "タイトル", class: "form-label" %>
-            <%= form.text_field :title, required: true, class: "form-input" %>
-        </div>
+            <div class="form-group">
+                <%= form.label :rating, "評価", class: "form-label" %>
+                <%= form.select :rating, options_for_select([
+                            ['未評価', nil],
+                            ['★☆☆☆☆ (1)', 1],
+                            ['★★☆☆☆ (2)', 2],
+                            ['★★★☆☆ (3)', 3],
+                            ['★★★★☆ (4)', 4],
+                            ['★★★★★ (5)', 5]
+                        ]), {}, { class: "form-select" } %>
+            </div>
 
-        <div class="form-group">
-            <%= form.label :author, "著者", class: "form-label" %>
-            <%= form.text_field :author, class: "form-input" %>
-        </div>
+            <div class="form-group">
+                <%= form.label :memo, "メモ・感想", class: "form-label" %>
+                <%= form.text_area :memo, rows: 6, placeholder: "読んだ感想や印象に残った部分を記録しましょう...", class: "form-textarea" %>
+            </div>
 
-        <div class="form-group">
-            <%= form.label :publisher, "出版社", class: "form-label" %>
-            <%= form.text_field :publisher, class: "form-input" %>
+            <div class="form-actions">
+                <%= form.submit "保存", class: "submit-button primary" %>
+                <%= link_to "キャンセル", books_path, class: "submit-button secondary" %>
+            </div>
+            <% end %>
         </div>
-
-        <div class="form-group">
-            <%= form.label :cover_image_url, "表紙画像URL", class: "form-label" %>
-            <%= form.url_field :cover_image_url, class: "form-input" %>
-        </div>
-
-        <div class="form-group">
-            <%= form.label :rating, "評価", class: "form-label" %>
-            <%= form.select :rating, options_for_select([
-                    ['未評価', nil],
-                    ['★☆☆☆☆ (1)', 1],
-                    ['★★☆☆☆ (2)', 2],
-                    ['★★★☆☆ (3)', 3],
-                    ['★★★★☆ (4)', 4],
-                    ['★★★★★ (5)', 5]
-                ]), {}, { class: "form-select" } %>
-        </div>
-
-        <div class="form-group">
-            <%= form.label :memo, "メモ・感想", class: "form-label" %>
-            <%= form.text_area :memo, rows: 6, placeholder: "読んだ感想や印象に残った部分を記録しましょう...", class: "form-textarea" %>
-        </div>
-
-        <div class="form-actions">
-            <%= form.submit "保存", class: "btn btn-primary" %>
-            <%= link_to "キャンセル", books_path, class: "btn btn-secondary" %>
-        </div>
-        <% end %>
     </div>
 </div>
 
 <script>
-    // ページ読み込み完了後に初期化を確実に行う
     (function() {
         'use strict';
 
-        // BookSearchオブジェクトを確実に初期化
         function initializeBookSearch() {
             window.BookSearch = {
                 currentQuery: '',
                 currentPage: 1,
                 totalPages: 0,
+                validPages: new Set(),
                 isLoading: false,
                 initialized: true,
 
                 async search(page = 1) {
-                    console.log('=== BookSearch.search called ===');
                     const query = document.getElementById('search-input').value.trim();
                     const resultsDiv = document.getElementById('search-results');
                     const paginationDiv = document.getElementById('search-pagination');
                     const paginationInfo = document.getElementById('pagination-info');
 
-                    console.log('Query:', query);
-
                     if (!query) {
-                        resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">🔍</div><p>検索キーワードを入力してください</p></div>';
+                        resultsDiv.innerHTML = '<div class="search-empty"><div class="empty-icon">🔍</div><p>検索キーワードを入力してください</p></div>';
                         paginationDiv.style.display = 'none';
                         paginationInfo.style.display = 'none';
                         return;
@@ -149,43 +158,68 @@
 
                     if (this.isLoading) return;
 
+                    if (this.currentQuery !== query) {
+                        this.validPages.clear();
+                        this.totalPages = 0;
+                    }
+
                     this.isLoading = true;
                     this.currentQuery = query;
                     this.currentPage = page;
 
                     const startIndex = (page - 1) * 10;
 
-                    resultsDiv.innerHTML = '<div class="search-results-loading"><div class="loading"><div class="loading-spinner"></div>検索中...</div></div>';
+                    resultsDiv.innerHTML = '<div class="search-loading"><div class="loading-spinner"></div><p>検索中...</p></div>';
                     paginationDiv.style.display = 'none';
                     paginationInfo.style.display = 'none';
 
                     try {
-                        console.log('Fetching from API...');
                         const response = await fetch(`/books/search_external?query=${encodeURIComponent(query)}&start_index=${startIndex}`);
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
                         const data = await response.json();
 
-                        console.log('API Response:', data);
-
-                        if (data.items.length === 0 && page > 1) {
-                            console.log('No results found for page', page, ', going back to page', page - 1);
-                            this.search(page - 1);
-                            return;
+                        if (data.error) {
+                            throw new Error(data.error);
                         }
 
-                        if (data.items.length === 0 && page === 1) {
-                            resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">📚</div><p>検索結果が見つかりませんでした</p></div>';
-                            paginationDiv.style.display = 'none';
-                            paginationInfo.style.display = 'none';
-                            return;
-                        }
+                        this.totalPages = Math.max(this.totalPages, data.pagination.total_pages);
 
-                        this.displayResults(data.items);
-                        this.displayPagination(data.pagination);
-                        this.displayPaginationInfo(data.pagination);
+                        if (data.items.length > 0) {
+                            this.validPages.add(page);
+                            this.displayResults(data.items);
+                            this.displayPagination(data.pagination);
+                            this.displayPaginationInfo(data.pagination);
+                        } else {
+                            if (page === 1) {
+                                resultsDiv.innerHTML = '<div class="search-empty"><div class="empty-icon">📚</div><p>検索結果が見つかりませんでした</p></div>';
+                                paginationDiv.style.display = 'none';
+                                paginationInfo.style.display = 'none';
+                            } else {
+                                const lastValidPage = Math.max(...Array.from(this.validPages));
+                                if (lastValidPage && lastValidPage < page) {
+                                    this.search(lastValidPage);
+                                    return;
+                                } else {
+                                    resultsDiv.innerHTML = '<div class="search-empty"><div class="empty-icon">📚</div><p>これ以上の結果はありません</p></div>';
+                                    this.totalPages = Math.max(...Array.from(this.validPages));
+                                    const correctedPagination = {
+                                        ...data.pagination,
+                                        total_pages: this.totalPages,
+                                        current_page: page,
+                                        has_next: false
+                                    };
+                                    this.displayPagination(correctedPagination);
+                                    this.displayPaginationInfo(correctedPagination);
+                                }
+                            }
+                        }
 
                     } catch (error) {
-                        console.error('Search error:', error);
-                        resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">⚠️</div><p>検索中にエラーが発生しました</p></div>';
+                        resultsDiv.innerHTML = `<div class="search-error"><div class="error-icon">⚠️</div><p>検索中にエラーが発生しました: ${error.message}</p></div>`;
                         paginationDiv.style.display = 'none';
                         paginationInfo.style.display = 'none';
                     } finally {
@@ -194,139 +228,119 @@
                 },
 
                 displayResults(books) {
-                    console.log('=== displayResults called ===');
-                    console.log('Books data:', books);
-
                     const resultsDiv = document.getElementById('search-results');
-
-                    if (books.length === 0) {
-                        resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">📚</div><p>このページに結果がありません</p></div>';
-                        return;
-                    }
+                    if (books.length === 0) return;
 
                     let html = '';
                     const currentTime = Date.now();
 
                     books.forEach((book, index) => {
-                        console.log(`Processing book ${index}:`, book);
-
-                        // 画像が有効かチェック
-                        const hasValidImage = book.cover_image &&
-                            book.cover_image !== '' &&
-                            book.cover_image !== 'null' &&
-                            book.cover_image !== 'undefined';
-
-                        console.log(`Book ${index} has valid image:`, hasValidImage);
-
-                        // 各本に一意のIDを割り当て
+                        const hasValidImage = book.cover_image && book.cover_image !== '' && book.cover_image !== 'null';
                         const bookId = `book-${index}-${currentTime}`;
 
                         html += `
-                            <div class="search-result" onclick="window.BookSearch.selectBook('${this.escapeHtml(book.title)}', '${this.escapeHtml(book.authors)}', '${this.escapeHtml(book.publisher)}', '${this.escapeHtml(book.cover_image || '')}')">
-                                <div class="search-result-content">
-                                    <div class="search-result-cover" id="cover-${bookId}">
-                                        ${hasValidImage ? 
-                                            `<div class="image-container" style="position: relative; width: 60px; height: 80px;">
-                                                <img id="img-${bookId}"
-                                                     src="${book.cover_image}" 
-                                                     alt="${this.escapeHtml(book.title)}" 
-                                                     style="width: 60px; height: 80px; object-fit: cover; border-radius: 4px; display: block;"
-                                                     onload="window.BookSearch.handleImageLoad('${bookId}', '${this.escapeHtml(book.title)}')"
-                                                     onerror="window.BookSearch.handleImageError('${bookId}', '${this.escapeHtml(book.title)}')">
-                                                <div id="fallback-${bookId}" 
-                                                     style="position: absolute; top: 0; left: 0; width: 60px; height: 80px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 4px; display: none; justify-content: center; align-items: center; color: white; font-size: 1.5rem;">📖</div>
-                                                <div id="loading-${bookId}"
-                                                     style="position: absolute; top: 0; left: 0; width: 60px; height: 80px; background: #f3f4f6; border-radius: 4px; display: flex; justify-content: center; align-items: center; color: #6b7280; font-size: 1rem;">⏳</div>
-                                            </div>` : 
-                                            `<div style="width: 60px; height: 80px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">📖</div>`
-                                        }
-                                    </div>
-                                    <div class="search-result-info">
-                                        <h3 class="search-result-title">${this.escapeHtml(book.title)}</h3>
-                                        <p class="search-result-author">著者: ${this.escapeHtml(book.authors)}</p>
-                                        <p class="search-result-publisher">出版社: ${this.escapeHtml(book.publisher)}</p>
-                                    </div>
+                            <div class="search-result-card" onclick="window.BookSearch.selectBook('${this.escapeHtml(book.title)}', '${this.escapeHtml(book.authors)}', '${this.escapeHtml(book.publisher)}', '${this.escapeHtml(book.cover_image || '')}')">
+                                <div class="result-cover" id="cover-${bookId}">
+                                    ${hasValidImage ? 
+                                        `<div class="image-container">
+                                            <img id="img-${bookId}"
+                                                 src="${book.cover_image}" 
+                                                 alt="${this.escapeHtml(book.title)}" 
+                                                 class="result-image"
+                                                 onload="window.BookSearch.handleImageLoad('${bookId}')"
+                                                 onerror="window.BookSearch.handleImageError('${bookId}', '${this.escapeHtml(book.title)}')">
+                                            <div id="fallback-${bookId}" class="result-fallback">
+                                                <span class="fallback-icon">📖</span>
+                                                <span class="fallback-text">画像なし</span>
+                                            </div>
+                                            <div id="loading-${bookId}" class="result-loading">
+                                                <div class="loading-mini"></div>
+                                                <span class="loading-text">読込中</span>
+                                            </div>
+                                        </div>` : 
+                                        `<div class="result-placeholder">
+                                            <span class="placeholder-icon">📖</span>
+                                            <span class="placeholder-text">画像なし</span>
+                                        </div>`
+                                    }
+                                </div>
+                                <div class="result-info">
+                                    <h3 class="result-title">${this.escapeHtml(book.title)}</h3>
+                                    <p class="result-author">著者: ${this.escapeHtml(book.authors)}</p>
+                                    <p class="result-publisher">出版社: ${this.escapeHtml(book.publisher)}</p>
                                 </div>
                             </div>
                         `;
                     });
 
-                    console.log('Setting innerHTML with HTML length:', html.length);
                     resultsDiv.innerHTML = html;
-
-                    // 画像の読み込み管理
                     this.manageImageLoading(books, currentTime);
-                },
-
-                manageImageLoading(books, currentTime) {
-                    books.forEach((book, index) => {
-                        if (book.cover_image && book.cover_image !== '') {
-                            const bookId = `book-${index}-${currentTime}`;
-
-                            // 3秒後にタイムアウトでフォールバックを表示
-                            setTimeout(() => {
-                                const img = document.getElementById(`img-${bookId}`);
-                                const loading = document.getElementById(`loading-${bookId}`);
-
-                                if (img && !img.complete) {
-                                    console.warn(`⏰ Image timeout for: ${book.title}`);
-                                    this.handleImageError(bookId, book.title);
-                                } else if (loading && loading.style.display !== 'none') {
-                                    // まだローディング中の場合
-                                    this.handleImageError(bookId, book.title);
-                                }
-                            }, 3000);
-                        }
-                    });
-                },
-
-                handleImageLoad(bookId, bookTitle) {
-                    console.log(`✅ Image loaded successfully for: ${bookTitle}`);
-                    const loading = document.getElementById(`loading-${bookId}`);
-                    if (loading) {
-                        loading.style.display = 'none';
-                    }
-                },
-
-                handleImageError(bookId, bookTitle) {
-                    console.error(`❌ Image failed for: ${bookTitle}`);
-                    const img = document.getElementById(`img-${bookId}`);
-                    const fallback = document.getElementById(`fallback-${bookId}`);
-                    const loading = document.getElementById(`loading-${bookId}`);
-
-                    if (img) img.style.display = 'none';
-                    if (loading) loading.style.display = 'none';
-                    if (fallback) fallback.style.display = 'flex';
                 },
 
                 displayPagination(pagination) {
                     const paginationDiv = document.getElementById('search-pagination');
+                    const currentPage = pagination.current_page;
+                    const maxValidPage = this.validPages.size > 0 ? Math.max(...Array.from(this.validPages)) : 1;
+                    const displayTotalPages = Math.max(maxValidPage, this.totalPages);
 
-                    if (pagination.total_pages <= 1) {
+                    if (displayTotalPages <= 1) {
                         paginationDiv.style.display = 'none';
                         return;
                     }
 
                     let html = '';
 
-                    if (pagination.has_prev) {
-                        html += `<button class="pagination-btn pagination-btn-prev" onclick="safeSearch(${pagination.current_page - 1})">前へ</button>`;
+                    if (pagination.has_prev && currentPage > 1) {
+                        html += `<button class="pagination-button prev" onclick="safeSearch(${currentPage - 1})">前へ</button>`;
                     } else {
-                        html += `<button class="pagination-btn pagination-btn-prev" disabled>前へ</button>`;
+                        html += `<button class="pagination-button prev disabled">前へ</button>`;
                     }
 
-                    for (let i = 1; i <= Math.min(pagination.total_pages, 5); i++) {
-                        if (i === pagination.current_page) {
-                            html += `<button class="pagination-btn active">${i}</button>`;
+                    let startPage, endPage;
+                    if (displayTotalPages <= 10) {
+                        startPage = 1;
+                        endPage = displayTotalPages;
+                    } else {
+                        if (currentPage <= 5) {
+                            startPage = 1;
+                            endPage = 8;
+                        } else if (currentPage >= displayTotalPages - 4) {
+                            startPage = displayTotalPages - 7;
+                            endPage = displayTotalPages;
                         } else {
-                            html += `<button class="pagination-btn" onclick="safeSearch(${i})">${i}</button>`;
+                            startPage = currentPage - 3;
+                            endPage = currentPage + 4;
                         }
                     }
 
-                    if (pagination.has_next) {
-                        html += `<button class="pagination-btn pagination-btn-next" onclick="safeSearch(${pagination.current_page + 1})">次へ</button>`;
+                    if (startPage > 1) {
+                        html += `<button class="pagination-button" onclick="safeSearch(1)">1</button>`;
+                        if (startPage > 2) {
+                            html += `<span class="pagination-ellipsis">...</span>`;
+                        }
+                    }
+
+                    for (let i = startPage; i <= endPage; i++) {
+                        if (i === currentPage) {
+                            html += `<button class="pagination-button active">${i}</button>`;
+                        } else if (i <= maxValidPage) {
+                            html += `<button class="pagination-button" onclick="safeSearch(${i})">${i}</button>`;
+                        } else if (i === maxValidPage + 1 && pagination.has_next) {
+                            html += `<button class="pagination-button" onclick="safeSearch(${i})">${i}</button>`;
+                        }
+                    }
+
+                    if (endPage < displayTotalPages && displayTotalPages <= maxValidPage + 1) {
+                        if (endPage < displayTotalPages - 1) {
+                            html += `<span class="pagination-ellipsis">...</span>`;
+                        }
+                        html += `<button class="pagination-button" onclick="safeSearch(${displayTotalPages})">${displayTotalPages}</button>`;
+                    }
+
+                    if (pagination.has_next || currentPage < maxValidPage + 1) {
+                        html += `<button class="pagination-button next" onclick="safeSearch(${currentPage + 1})">次へ</button>`;
                     } else {
-                        html += `<button class="pagination-btn pagination-btn-next" disabled>次へ</button>`;
+                        html += `<button class="pagination-button next disabled">次へ</button>`;
                     }
 
                     paginationDiv.innerHTML = html;
@@ -342,34 +356,68 @@
                     }
 
                     const startItem = pagination.start_index + 1;
-                    const endItem = Math.min(pagination.start_index + pagination.items_per_page, pagination.total_items);
+                    const endItem = Math.min(pagination.start_index + 10, pagination.total_items);
+                    const maxValidPage = this.validPages.size > 0 ? Math.max(...Array.from(this.validPages)) : 1;
 
-                    paginationInfo.innerHTML = `${startItem}〜${endItem}件 / 全${pagination.total_items}件`;
+                    let infoText = `${startItem}〜${endItem}件 / 全${pagination.total_items}件 (${pagination.current_page}/${maxValidPage}+ページ)`;
+
+                    if (pagination.total_items >= 1000) {
+                        infoText += ` ※最大1000件まで表示`;
+                    }
+
+                    paginationInfo.innerHTML = infoText;
                     paginationInfo.style.display = 'block';
                 },
 
-                selectBook(title, authors, publisher, coverImage) {
-                    console.log('selectBook called with:', {
-                        title,
-                        authors,
-                        publisher,
-                        coverImage
-                    });
+                manageImageLoading(books, currentTime) {
+                    books.forEach((book, index) => {
+                        if (book.cover_image && book.cover_image !== '') {
+                            const bookId = `book-${index}-${currentTime}`;
 
+                            setTimeout(() => {
+                                const img = document.getElementById(`img-${bookId}`);
+                                const loading = document.getElementById(`loading-${bookId}`);
+
+                                if (img && !img.complete) {
+                                    this.handleImageError(bookId, book.title);
+                                } else if (loading && loading.style.display !== 'none') {
+                                    this.handleImageError(bookId, book.title);
+                                }
+                            }, 2000);
+                        }
+                    });
+                },
+
+                handleImageLoad(bookId) {
+                    const loading = document.getElementById(`loading-${bookId}`);
+                    if (loading) {
+                        loading.style.display = 'none';
+                    }
+                },
+
+                handleImageError(bookId, bookTitle) {
+                    const img = document.getElementById(`img-${bookId}`);
+                    const fallback = document.getElementById(`fallback-${bookId}`);
+                    const loading = document.getElementById(`loading-${bookId}`);
+
+                    if (img) img.style.display = 'none';
+                    if (loading) loading.style.display = 'none';
+                    if (fallback) fallback.style.display = 'flex';
+                },
+
+                selectBook(title, authors, publisher, coverImage) {
                     document.getElementById('book_title').value = title;
                     document.getElementById('book_author').value = authors;
                     document.getElementById('book_publisher').value = publisher;
                     document.getElementById('book_cover_image_url').value = coverImage;
 
-                    // スクロールしてフォームを表示
                     document.getElementById('book_title').scrollIntoView({
                         behavior: 'smooth'
                     });
 
-                    // 選択したことを視覚的に示す
                     const selectedMessage = document.createElement('div');
                     selectedMessage.innerHTML = '✅ 本が選択されました';
-                    selectedMessage.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #10b981; color: white; padding: 12px 20px; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+                    selectedMessage.className = 'selection-message';
                     document.body.appendChild(selectedMessage);
 
                     setTimeout(() => {
@@ -384,95 +432,61 @@
                     return div.innerHTML;
                 }
             };
-
-            console.log('BookSearch initialized:', window.BookSearch.initialized);
         }
 
-        // 安全な検索関数（グローバル）
         window.safeSearch = function(page = 1) {
             if (window.BookSearch && window.BookSearch.initialized) {
                 window.BookSearch.search(page);
             } else {
-                console.error('BookSearch not initialized yet');
-                // 少し待ってから再試行
                 setTimeout(() => {
                     if (window.BookSearch && window.BookSearch.initialized) {
                         window.BookSearch.search(page);
-                    } else {
-                        alert('検索機能の初期化中です。少し待ってから再度お試しください。');
                     }
                 }, 100);
             }
         };
 
-        // ページ読み込み状態をチェックして初期化
+        window.searchExample = function(exampleQuery) {
+            const searchInput = document.getElementById('search-input');
+            searchInput.value = exampleQuery;
+            safeSearch(1);
+        };
+
         function initialize() {
             if (document.readyState === 'loading') {
-                // まだ読み込み中
                 document.addEventListener('DOMContentLoaded', initializeBookSearch);
             } else {
-                // 既に読み込み完了
                 initializeBookSearch();
             }
-
-            // 念のため、windowのloadイベントでも初期化
-            window.addEventListener('load', function() {
-                if (!window.BookSearch || !window.BookSearch.initialized) {
-                    initializeBookSearch();
-                }
-            });
         }
 
-        // イベントリスナーを設定
         function setupEventListeners() {
             const searchInput = document.getElementById('search-input');
             if (searchInput) {
-                // 既存のイベントリスナーを削除
-                searchInput.removeEventListener('keypress', handleKeyPress);
-                searchInput.removeEventListener('input', handleInput);
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        safeSearch(1);
+                    }
+                });
 
-                // 新しいイベントリスナーを追加
-                searchInput.addEventListener('keypress', handleKeyPress);
-                searchInput.addEventListener('input', handleInput);
+                searchInput.addEventListener('input', function(e) {
+                    if (e.target.value.trim() === '') {
+                        const resultsDiv = document.getElementById('search-results');
+                        const paginationDiv = document.getElementById('search-pagination');
+                        const paginationInfo = document.getElementById('pagination-info');
+
+                        if (resultsDiv) resultsDiv.innerHTML = '';
+                        if (paginationDiv) paginationDiv.style.display = 'none';
+                        if (paginationInfo) paginationInfo.style.display = 'none';
+                    }
+                });
             } else {
-                // 要素がまだない場合は少し待って再試行
                 setTimeout(setupEventListeners, 100);
             }
         }
 
-        function handleKeyPress(e) {
-            if (e.key === 'Enter') {
-                safeSearch(1);
-            }
-        }
-
-        function handleInput(e) {
-            if (e.target.value.trim() === '') {
-                const resultsDiv = document.getElementById('search-results');
-                const paginationDiv = document.getElementById('search-pagination');
-                const paginationInfo = document.getElementById('pagination-info');
-
-                if (resultsDiv) resultsDiv.innerHTML = '';
-                if (paginationDiv) paginationDiv.style.display = 'none';
-                if (paginationInfo) paginationInfo.style.display = 'none';
-            }
-        }
-
-        // 初期化とイベントリスナー設定を実行
         initialize();
-
-        // DOMContentLoadedでイベントリスナー設定
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', setupEventListeners);
-        } else {
-            setupEventListeners();
-        }
-
-        function searchExample(exampleQuery) {
-            const searchInput = document.getElementById('search-input');
-            searchInput.value = exampleQuery;
-            safeSearch(1);
-        }
+        setupEventListeners();
 
     })();
 </script>
