@@ -1,36 +1,33 @@
-<% content_for :title, "#{@book.title} - コーヒーと本と猫" %>
+<% content_for :title, @book.title %>
 
-<div class="book-detail-page">
+<div class="book-detail-container">
     <div class="back-navigation">
         <%= link_to books_path, class: "back-button" do %>
-        <span class="back-icon">←</span>
-        戻る
+        ← 戻る
         <% end %>
     </div>
 
     <div class="book-detail-card">
         <div class="book-detail-header">
-            <div class="book-detail-cover">
+            <div class="detail-cover">
                 <% if @book.cover_image_url.present? %>
                 <img src="<%= @book.cover_image_url %>" alt="<%= @book.title %>" class="detail-cover-image">
                 <% else %>
                 <div class="detail-cover-placeholder">
-                    <span class="detail-cover-icon">📖</span>
-                    <div class="detail-cover-title"><%= @book.title %></div>
+                    <div class="cover-title"><%= @book.title %></div>
                     <% if @book.author.present? %>
-                    <div class="detail-cover-author"><%= @book.author %></div>
+                    <div class="cover-author"><%= @book.author %></div>
                     <% end %>
                 </div>
                 <% end %>
             </div>
 
-            <div class="book-detail-info">
+            <div class="detail-info">
                 <h1 class="detail-title"><%= @book.title %></h1>
 
                 <div class="detail-meta">
                     <% if @book.author.present? %>
                     <div class="meta-item">
-                        <span class="meta-icon">✍️</span>
                         <span class="meta-label">著者:</span>
                         <span class="meta-value"><%= @book.author %></span>
                     </div>
@@ -38,14 +35,12 @@
 
                     <% if @book.publisher.present? %>
                     <div class="meta-item">
-                        <span class="meta-icon">🏢</span>
                         <span class="meta-label">出版社:</span>
                         <span class="meta-value"><%= @book.publisher %></span>
                     </div>
                     <% end %>
 
                     <div class="meta-item">
-                        <span class="meta-icon">📅</span>
                         <span class="meta-label">追加日:</span>
                         <span class="meta-value"><%= @book.created_at.strftime("%Y年%m月%d日") %></span>
                     </div>
@@ -54,7 +49,7 @@
                 <% if @book.rating.present? %>
                 <div class="rating-section">
                     <h3 class="section-title">評価</h3>
-                    <div class="large-star-rating">
+                    <div class="rating-stars">
                         <% @book.rating.times do %>
                         <span class="star filled">★</span>
                         <% end %>
@@ -69,29 +64,23 @@
                 <div class="detail-actions">
                     <%= link_to "編集", edit_book_path(@book), class: "action-button primary" %>
                     <%= button_to "削除", @book, method: :delete, 
-                        confirm: "本当に削除しますか？", 
-                        class: "action-button danger" %>
+              data: { turbo_confirm: "本当に削除しますか？" }, 
+              class: "action-button danger" %>
                 </div>
             </div>
         </div>
 
         <% if @book.memo.present? %>
         <div class="memo-section">
-            <h3 class="section-title">
-                <span class="section-icon">📝</span>
-                メモ・感想
-            </h3>
+            <h3 class="section-title">メモ・感想</h3>
             <div class="memo-content">
                 <%= simple_format(@book.memo) %>
             </div>
         </div>
         <% end %>
 
-        <div class="related-books-section">
-            <h3 class="section-title">
-                <span class="section-icon">📚</span>
-                最近追加した本
-            </h3>
+        <div class="related-section">
+            <h3 class="section-title">最近追加した本</h3>
             <% recent_books = current_user.books.recent.limit(4).where.not(id: @book.id) %>
 
             <% if recent_books.any? %>
@@ -103,8 +92,7 @@
                         <img src="<%= book.cover_image_url %>" alt="<%= book.title %>" class="related-cover-image">
                         <% else %>
                         <div class="related-cover-placeholder">
-                            <span class="related-cover-icon">📖</span>
-                            <div class="related-cover-title"><%= truncate(book.title, length: 25) %></div>
+                            <%= truncate(book.title, length: 25) %>
                         </div>
                         <% end %>
                     </div>
@@ -118,7 +106,7 @@
                 <% end %>
             </div>
             <% else %>
-            <p class="no-related-books">他に本がありません</p>
+            <p class="no-related">他に本がありません</p>
             <% end %>
         </div>
     </div>

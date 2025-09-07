@@ -1,11 +1,8 @@
 <% content_for :title, "ログイン" %>
 
-<div class="auth-page">
+<div class="auth-container">
     <div class="auth-card">
-        <div class="auth-header">
-            <h1 class="auth-title">おかえりなさい</h1>
-            <p class="auth-subtitle">あなたの本棚が待っています</p>
-        </div>
+        <h1 class="auth-title">読書記録を始めましょう</h1>
 
         <%= form_with url: login_path, local: true, class: "auth-form" do |form| %>
         <div class="form-group">
@@ -24,10 +21,8 @@
         <% end %>
 
         <div class="auth-footer">
-            <p class="auth-switch">
-                アカウントをお持ちでない方は
-                <%= link_to "新規登録はこちら", signup_path, class: "auth-link" %>
-            </p>
+            <p>アカウントをお持ちでない方は</p>
+            <%= link_to "新規登録はこちら", signup_path, class: "auth-link" %>
         </div>
     </div>
 </div>

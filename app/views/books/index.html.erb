@@ -1,40 +1,34 @@
-<% content_for :title, "読了一覧 - コーヒーと本と猫" %>
+<% content_for :title, "読書記録" %>
 
-<div class="library-page">
+<div class="library-container">
     <section class="hero-section">
-        <div class="hero-content">
-            <h1 class="hero-title">あなたの図書館</h1>
-            <p class="hero-subtitle">読んだ本たちがここに眠っています</p>
+        <h1 class="hero-title">あなたの読書記録</h1>
+        <p class="hero-subtitle">読んだ本を記録して、感想やメモを保存しましょう。</p>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <span class="stat-number"><%= current_user.books.count %></span>
-                    <span class="stat-label">読了冊数</span>
-                    <span class="stat-icon">📚</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number">
-                        <%= current_user.books.where.not(rating: nil).average(:rating)&.round(1) || "未評価" %>
-                    </span>
-                    <span class="stat-label">平均評価</span>
-                    <span class="stat-icon">⭐</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number">
-                        <%= current_user.books.where(created_at: Time.current.beginning_of_month..Time.current.end_of_month).count %>
-                    </span>
-                    <span class="stat-label">今月の読了</span>
-                    <span class="stat-icon">📖</span>
-                </div>
+        <div class="stats-container">
+            <div class="stat-card">
+                <span class="stat-number"><%= current_user.books.count %></span>
+                <span class="stat-label">読了冊数</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">
+                    <%= current_user.books.where.not(rating: nil).average(:rating)&.round(1) || "未評価" %>
+                </span>
+                <span class="stat-label">平均評価</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">
+                    <%= current_user.books.where(created_at: Time.current.beginning_of_month..Time.current.end_of_month).count %>
+                </span>
+                <span class="stat-label">今月の読了</span>
             </div>
         </div>
     </section>
 
     <section class="search-section">
         <%= form_with url: books_path, method: :get, local: true, class: "search-form" do |form| %>
-        <div class="search-field">
-            <span class="search-icon">🔍</span>
-            <%= form.text_field :search, value: @search_query, placeholder: "本のタイトルで検索...", class: "search-input" %>
+        <div class="search-input-group">
+            <%= form.text_field :search, value: @search_query, placeholder: "本のタイトルで検索", class: "search-input" %>
         </div>
         <%= form.submit "検索", class: "search-button" %>
         <% if @search_query.present? %>
@@ -44,8 +38,7 @@
     </section>
 
     <% if @search_query.present? %>
-    <div class="search-result-info">
-        <span class="search-icon">📋</span>
+    <div class="search-info">
         「<%= @search_query %>」の検索結果: <%= @books.count %>件
     </div>
     <% end %>
@@ -60,7 +53,6 @@
                     <img src="<%= book.cover_image_url %>" alt="<%= book.title %>" class="cover-image">
                     <% else %>
                     <div class="cover-placeholder">
-                        <span class="cover-icon">📖</span>
                         <div class="cover-title"><%= truncate(book.title, length: 30) %></div>
                         <% if book.author.present? %>
                         <div class="cover-author"><%= truncate(book.author, length: 20) %></div>
@@ -69,12 +61,10 @@
                     <% end %>
 
                     <% if book.rating.present? %>
-                    <div class="rating-overlay">
-                        <div class="star-rating">
-                            <% book.rating.times do %>
-                            <span class="star filled">★</span>
-                            <% end %>
-                        </div>
+                    <div class="rating-badge">
+                        <% book.rating.times do %>
+                        <span class="star">★</span>
+                        <% end %>
                     </div>
                     <% end %>
                 </div>
@@ -96,10 +86,9 @@
         </div>
         <% else %>
         <div class="empty-state">
-            <div class="empty-icon">🏠</div>
             <h3 class="empty-title">まだ本が登録されていません</h3>
             <p class="empty-description">最初の本を追加して、読書記録を始めましょう！</p>
-            <%= link_to "本を追加", new_book_path, class: "add-book-button" %>
+            <%= link_to "本を追加", new_book_path, class: "add-button" %>
         </div>
         <% end %>
     </section>
