@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* カスタムユーティリティクラス */
 @layer utilities {
     .line-clamp-1 {
         overflow: hidden;
@@ -38,53 +37,131 @@
     }
 }
 
-/* カスタムコンポーネント */
-@layer components {
-    .btn-base {
-        @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200;
-    }
+.btn-base {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border: 1px solid transparent;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    outline: none;
+    transition: all 0.2s ease-in-out;
+}
 
-    .btn-primary {
-        @apply btn-base text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500;
-    }
+.btn-base:focus {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
 
-    .btn-secondary {
-        @apply btn-base text-gray-700 bg-white border-gray-300 hover:bg-gray-50 focus:ring-blue-500;
-    }
+.btn-primary {
+    color: white;
+    background-color: #3b82f6;
+}
 
-    .btn-danger {
-        @apply btn-base text-white bg-red-600 hover:bg-red-700 focus:ring-red-500;
-    }
+.btn-primary:hover {
+    background-color: #2563eb;
+}
 
-    .form-input {
-        @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500;
-    }
+.btn-secondary {
+    color: #374151;
+    background-color: white;
+    border-color: #d1d5db;
+}
 
-    .form-textarea {
-        @apply form-input resize-vertical;
-    }
+.btn-secondary:hover {
+    background-color: #f9fafb;
+}
 
-    .form-select {
-        @apply form-input pr-10 bg-white;
-    }
+.btn-danger {
+    color: white;
+    background-color: #ef4444;
+}
 
-    .form-label {
-        @apply block text-sm font-medium text-gray-700 mb-1;
-    }
+.btn-danger:hover {
+    background-color: #dc2626;
+}
 
-    .card {
-        @apply bg-white overflow-hidden shadow rounded-lg;
-    }
+.form-input {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    color: #111827;
+}
 
-    .card-header {
-        @apply px-4 py-5 sm:px-6;
-    }
+.form-input::placeholder {
+    color: #9ca3af;
+}
 
-    .card-body {
-        @apply px-4 py-5 sm:p-6;
-    }
+.form-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
 
-    .card-footer {
-        @apply px-4 py-4 sm:px-6;
-    }
+.form-textarea {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    color: #111827;
+    resize: vertical;
+}
+
+.form-textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-select {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    background-color: white;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.25rem;
+}
+
+.card {
+    background-color: white;
+    overflow: hidden;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    padding: 1.25rem 1.5rem;
+}
+
+.card-body {
+    padding: 1.25rem 1.5rem;
+}
+
+.card-footer {
+    padding: 1rem 1.5rem;
 }
