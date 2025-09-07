@@ -610,6 +610,22 @@ body {
     font-size: 1rem;
 }
 
+.search-example-btn {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 1rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.search-example-btn:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+}
+
 .search-results {
     display: grid;
     gap: 1rem;
