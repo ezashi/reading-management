@@ -1,9 +1,9 @@
 namespace :debug do
   desc "Test Google Books API directly"
   task api_test: :environment do
-    require 'net/http'
-    require 'json'
-    require 'cgi'
+    require "net/http"
+    require "json"
+    require "cgi"
 
     api_key = Rails.application.credentials.google_books_api_key
 
@@ -37,7 +37,7 @@ namespace :debug do
       end
 
       request = Net::HTTP::Get.new(uri)
-      request['User-Agent'] = 'ReadingManagement/1.0'
+      request["User-Agent"] = "ReadingManagement/1.0"
 
       puts "Making request..."
       response = http.request(request)
@@ -45,14 +45,14 @@ namespace :debug do
       puts "Response code: #{response.code}"
       puts "Response message: #{response.message}"
 
-      if response.code == '200'
+      if response.code == "200"
         data = JSON.parse(response.body)
         puts "✅ API Test successful!"
         puts "Total items found: #{data['totalItems']}"
         puts "Items returned: #{data['items']&.length || 0}"
 
-        if data['items']&.any?
-          first_book = data['items'].first['volumeInfo']
+        if data["items"]&.any?
+          first_book = data["items"].first["volumeInfo"]
           puts "First book: #{first_book['title']} by #{first_book['authors']&.join(', ')}"
         end
       else
@@ -62,7 +62,7 @@ namespace :debug do
         # エラーレスポンスを解析
         begin
           error_data = JSON.parse(response.body)
-          if error_data['error']
+          if error_data["error"]
             puts "Error message: #{error_data['error']['message']}"
             puts "Error code: #{error_data['error']['code']}"
           end

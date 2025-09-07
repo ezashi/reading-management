@@ -1,6 +1,6 @@
 class BooksController < ApplicationController
-  before_action :require_login, except: [:search_external]
-  before_action :set_book, only: [:show, :edit, :update, :destroy]
+  before_action :require_login, except: [ :search_external ]
+  before_action :set_book, only: [ :show, :edit, :update, :destroy ]
 
 
   def index
@@ -50,7 +50,7 @@ class BooksController < ApplicationController
     Rails.logger.info "Params: #{params.inspect}"
     Rails.logger.info "Session user_id: #{session[:user_id]}"
     Rails.logger.info "Current user present: #{current_user.present?}"
-    
+
     query = params[:query]
     start_index = params[:start_index]&.to_i || 0
     max_results = 10
@@ -62,14 +62,14 @@ class BooksController < ApplicationController
     if query.present?
       books_service = GoogleBooksService.new
       Rails.logger.info "Created GoogleBooksService instance"
-      
+
       search_results = books_service.search(query, start_index, max_results)
       Rails.logger.info "Search results from service: #{search_results.inspect}"
 
       current_page = (start_index / max_results) + 1
       total_pages = (search_results[:total_items].to_f / max_results).ceil
 
-      is_last_page = search_results[:items].length < max_results || 
+      is_last_page = search_results[:items].length < max_results ||
                      start_index + max_results >= search_results[:total_items]
 
       has_next = search_results[:has_more_results] && !is_last_page
@@ -94,13 +94,13 @@ class BooksController < ApplicationController
           is_last_page: is_last_page
         }
       }
-      
+
       Rails.logger.info "Final response data: #{response_data.inspect}"
-      
+
       render json: response_data
     else
       Rails.logger.info "Empty query, returning empty result"
-      
+
       render json: {
         items: [],
         pagination: {
@@ -119,7 +119,7 @@ class BooksController < ApplicationController
   rescue => e
     Rails.logger.error "Error in search_external: #{e.class.name} - #{e.message}"
     Rails.logger.error "Backtrace: #{e.backtrace.first(10).join("\n")}"
-    
+
     render json: {
       items: [],
       pagination: {
