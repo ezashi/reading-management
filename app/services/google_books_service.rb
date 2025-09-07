@@ -18,14 +18,26 @@ class GoogleBooksService
   end
 
   def search(query, start_index = 0, max_results = 10)
-    Rails.logger.info "=== Google Books Service Debug ==="
+    Rails.logger.info "=== Search Request Debug ==="
     Rails.logger.info "Query: '#{query}'"
     Rails.logger.info "Start index: #{start_index}"
     Rails.logger.info "Max results: #{max_results}"
-    Rails.logger.info "API key present: #{@api_key.present?}"
-
+    Rails.logger.info "Rails environment: #{Rails.env}"
+    Rails.logger.info "USE_MOCK_BOOKS env var: #{ENV['USE_MOCK_BOOKS']}"
+    Rails.logger.info "Mock condition: #{Rails.env.development? && ENV['USE_MOCK_BOOKS'] == 'true'}"
+    
     return empty_result(max_results) if query.blank?
 
+    # モックデータを使用する条件をチェック
+    if Rails.env.development? && ENV['USE_MOCK_BOOKS'] == 'true'
+      Rails.logger.info "=== Using Mock Data ==="
+      return mock_search_results(query, start_index, max_results)
+    end
+
+    # 実際のAPI呼び出し
+    Rails.logger.info "=== Making Real API Call ==="
+    
+    # APIキーがある場合は追加
     params = {
       q: query,
       startIndex: start_index,
@@ -34,40 +46,27 @@ class GoogleBooksService
     params[:key] = @api_key if @api_key.present?
 
     uri = build_uri(params)
-    Rails.logger.info "Request URL: #{uri.to_s.gsub(@api_key.to_s, '[API_KEY_HIDDEN]')}"
+    Rails.logger.info "Request URL: #{uri}"
 
     begin
       response = make_request(uri)
       Rails.logger.info "Response code: #{response.code}"
-      Rails.logger.info "Response message: #{response.message}"
-
+      Rails.logger.info "Response headers: #{response.to_hash}"
+      
       if response.code == '200'
         Rails.logger.info "Response body length: #{response.body.length}"
-
-        # レスポンスボディの最初の部分をログ出力
-        body_preview = response.body[0..500]
-        Rails.logger.info "Response body preview: #{body_preview}..."
-
+        Rails.logger.info "Response body preview: #{response.body[0..200]}..."
+        
         data = JSON.parse(response.body)
         Rails.logger.info "Parsed data keys: #{data.keys}"
         Rails.logger.info "Total items: #{data['totalItems']}"
-        Rails.logger.info "Items array present: #{data['items'].present?}"
         Rails.logger.info "Items count: #{data['items']&.length || 0}"
-
-        if data['items']&.any?
-          first_item = data['items'].first
-          Rails.logger.info "First item keys: #{first_item.keys}"
-          Rails.logger.info "First item volume_info: #{first_item['volumeInfo']&.keys}"
-        end
-
-        result = process_response(data, start_index, max_results)
-        Rails.logger.info "Final result: #{result}"
-
-        return result
+        
+        process_response(data, start_index, max_results)
       else
         Rails.logger.error "Google Books API Error: #{response.code} - #{response.message}"
-        Rails.logger.error "Response body: #{response.body}"
-
+        Rails.logger.error "Response body: #{response.body}" if response.body
+        
         # エラーレスポンスを詳細に調査
         if response.body.present?
           begin
@@ -77,36 +76,36 @@ class GoogleBooksService
             Rails.logger.error "Could not parse error response as JSON"
           end
         end
-
-        return empty_result(max_results)
+        
+        empty_result(max_results)
       end
     rescue JSON::ParserError => e
       Rails.logger.error "JSON Parse Error: #{e.message}"
       Rails.logger.error "Response body: #{response.body}"
-      return empty_result(max_results)
+      empty_result(max_results)
     rescue => e
       Rails.logger.error "Google Books API error: #{e.class.name} - #{e.message}"
       Rails.logger.error "Backtrace: #{e.backtrace.first(10).join("\n")}"
-      return empty_result(max_results)
+      empty_result(max_results)
     end
   end
 
   # シンプルなテスト用メソッド
   def test_connection
     Rails.logger.info "=== Testing Google Books API Connection ==="
-
+    
     # 最もシンプルなクエリでテスト
     test_query = "ruby"
     params = { q: test_query, maxResults: 1 }
     params[:key] = @api_key if @api_key.present?
-
+    
     uri = build_uri(params)
     Rails.logger.info "Test URL: #{uri}"
-
+    
     begin
       response = make_request(uri)
       Rails.logger.info "Test response code: #{response.code}"
-
+      
       if response.code == '200'
         data = JSON.parse(response.body)
         Rails.logger.info "Test successful - Total items: #{data['totalItems']}"
@@ -123,14 +122,189 @@ class GoogleBooksService
 
   private
 
-  def build_uri(params)
-    query_string = params.map { |k, v| "#{k}=#{CGI.escape(v.to_s)}" }.join('&')
-    URI("#{BASE_URL}?#{query_string}")
+  def mock_search_results(query, start_index, max_results)
+    Rails.logger.info "=== Generating Mock Results ==="
+    Rails.logger.info "Mock query: #{query}, start: #{start_index}, max: #{max_results}"
+    
+    mock_books = [
+      # Ruby関連
+      {
+        title: "Rubyプログラミング入門",
+        authors: "まつもとゆきひろ",
+        publisher: "技術評論社",
+        cover_image: "https://picsum.photos/128/180?random=1",
+        description: "Rubyの入門書です"
+      },
+      {
+        title: "Ruby on Rails Tutorial",
+        authors: "Michael Hartl",
+        publisher: "Addison-Wesley",
+        cover_image: "https://picsum.photos/128/180?random=2",
+        description: "Ruby on Railsのチュートリアル"
+      },
+      {
+        title: "プログラミング言語Ruby",
+        authors: "まつもとゆきひろ, David Flanagan",
+        publisher: "オライリー・ジャパン",
+        cover_image: "https://picsum.photos/128/180?random=3",
+        description: "Rubyの詳細な解説書"
+      },
+      {
+        title: "Effective Ruby",
+        authors: "Peter J. Jones",
+        publisher: "翔泳社",
+        cover_image: "https://picsum.photos/128/180?random=4",
+        description: "効果的なRubyプログラミング"
+      },
+      {
+        title: "メタプログラミングRuby",
+        authors: "Paolo Perrotta",
+        publisher: "オライリー・ジャパン",
+        cover_image: "https://picsum.photos/128/180?random=5",
+        description: "Rubyのメタプログラミング"
+      },
+      {
+        title: "Ruby レシピブック",
+        authors: "青木峰郎",
+        publisher: "ソフトバンク",
+        cover_image: "https://picsum.photos/128/180?random=6",
+        description: "Rubyのレシピ集"
+      },
+      # Rails関連
+      {
+        title: "Railsで学ぶWebアプリケーション開発",
+        authors: "伊藤淳一",
+        publisher: "技術評論社",
+        cover_image: "https://picsum.photos/128/180?random=7",
+        description: "RailsによるWebアプリ開発"
+      },
+      {
+        title: "Rails Way",
+        authors: "Obie Fernandez",
+        publisher: "Addison-Wesley",
+        cover_image: "https://picsum.photos/128/180?random=8",
+        description: "Rails開発のベストプラクティス"
+      },
+      # Python関連
+      {
+        title: "Python入門",
+        authors: "Python著者",
+        publisher: "Python出版",
+        cover_image: "https://picsum.photos/128/180?random=9",
+        description: "Pythonの入門書"
+      },
+      {
+        title: "Pythonクラッシュコース",
+        authors: "Eric Matthes",
+        publisher: "翔泳社",
+        cover_image: "https://picsum.photos/128/180?random=10",
+        description: "Python速習コース"
+      },
+      {
+        title: "Effective Python",
+        authors: "Brett Slatkin",
+        publisher: "オライリー・ジャパン",
+        cover_image: "https://picsum.photos/128/180?random=11",
+        description: "効果的なPythonプログラミング"
+      },
+      # JavaScript関連
+      {
+        title: "JavaScript入門",
+        authors: "JavaScript著者",
+        publisher: "JavaScript出版",
+        cover_image: "https://picsum.photos/128/180?random=12",
+        description: "JavaScriptの基礎"
+      },
+      {
+        title: "JavaScript: The Good Parts",
+        authors: "Douglas Crockford",
+        publisher: "オライリー・ジャパン",
+        cover_image: "https://picsum.photos/128/180?random=13",
+        description: "JavaScriptの良い部分"
+      },
+      {
+        title: "モダンJavaScript入門",
+        authors: "現代JS著者",
+        publisher: "現代出版",
+        cover_image: "https://picsum.photos/128/180?random=14",
+        description: "現代的なJavaScript開発"
+      },
+      # その他のプログラミング
+      {
+        title: "Clean Code",
+        authors: "Robert C. Martin",
+        publisher: "Prentice Hall",
+        cover_image: "https://picsum.photos/128/180?random=15",
+        description: "きれいなコードの書き方"
+      },
+      {
+        title: "プログラミング思考",
+        authors: "思考著者",
+        publisher: "思考出版",
+        cover_image: "https://picsum.photos/128/180?random=16",
+        description: "プログラミングの考え方"
+      },
+      # 日本の小説
+      {
+        title: "吾輩は猫である",
+        authors: "夏目漱石",
+        publisher: "岩波書店",
+        cover_image: "https://picsum.photos/128/180?random=17",
+        description: "夏目漱石の代表作"
+      },
+      {
+        title: "こころ",
+        authors: "夏目漱石",
+        publisher: "新潮社",
+        cover_image: "https://picsum.photos/128/180?random=18",
+        description: "夏目漱石の名作"
+      },
+      {
+        title: "羅生門",
+        authors: "芥川龍之介",
+        publisher: "角川書店",
+        cover_image: "https://picsum.photos/128/180?random=19",
+        description: "芥川龍之介の短編集"
+      }
+    ]
+
+    # 検索フィルタリング
+    filtered_books = if query.present?
+      query_downcase = query.downcase
+      mock_books.select { |book| 
+        book[:title].downcase.include?(query_downcase) || 
+        book[:authors].downcase.include?(query_downcase) ||
+        book[:publisher].downcase.include?(query_downcase) ||
+        book[:description].downcase.include?(query_downcase)
+      }
+    else
+      mock_books
+    end
+
+    Rails.logger.info "Total mock books: #{mock_books.length}"
+    Rails.logger.info "Filtered books for query '#{query}': #{filtered_books.length}"
+
+    # ページネーション
+    paginated_books = filtered_books.slice(start_index, max_results) || []
+    
+    Rails.logger.info "Paginated books: #{paginated_books.length}"
+
+    result = {
+      items: paginated_books,
+      total_items: filtered_books.length,
+      start_index: start_index,
+      items_per_page: max_results,
+      api_total_items: filtered_books.length,
+      has_more_results: start_index + max_results < filtered_books.length
+    }
+    
+    Rails.logger.info "Mock result: #{result}"
+    result
   end
 
   def make_request(uri)
     Rails.logger.info "Making HTTP request to: #{uri.host}:#{uri.port}"
-
+    
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     http.open_timeout = 10
@@ -142,12 +316,12 @@ class GoogleBooksService
     request = Net::HTTP::Get.new(uri)
     request['User-Agent'] = 'ReadingManagement/1.0'
     request['Accept'] = 'application/json'
-
+    
     Rails.logger.info "Request headers: #{request.to_hash}"
 
     response = http.request(request)
     Rails.logger.info "Response received: #{response.class.name}"
-
+    
     response
   end
 

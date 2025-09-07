@@ -1,6 +1,7 @@
 class BooksController < ApplicationController
-  before_action :require_login
+  before_action :require_login, except: [:search_external]
   before_action :set_book, only: [:show, :edit, :update, :destroy]
+
 
   def index
     @books = current_user.books.recent
@@ -45,13 +46,25 @@ class BooksController < ApplicationController
   end
 
   def search_external
+    Rails.logger.info "=== Books Controller search_external ==="
+    Rails.logger.info "Params: #{params.inspect}"
+    Rails.logger.info "Session user_id: #{session[:user_id]}"
+    Rails.logger.info "Current user present: #{current_user.present?}"
+    
     query = params[:query]
     start_index = params[:start_index]&.to_i || 0
     max_results = 10
 
+    Rails.logger.info "Query: '#{query}'"
+    Rails.logger.info "Start index: #{start_index}"
+    Rails.logger.info "Max results: #{max_results}"
+
     if query.present?
       books_service = GoogleBooksService.new
+      Rails.logger.info "Created GoogleBooksService instance"
+      
       search_results = books_service.search(query, start_index, max_results)
+      Rails.logger.info "Search results from service: #{search_results.inspect}"
 
       current_page = (start_index / max_results) + 1
       total_pages = (search_results[:total_items].to_f / max_results).ceil
@@ -59,9 +72,7 @@ class BooksController < ApplicationController
       is_last_page = search_results[:items].length < max_results || 
                      start_index + max_results >= search_results[:total_items]
 
-
       has_next = search_results[:has_more_results] && !is_last_page
-
       has_prev = start_index > 0
 
       if search_results[:items].empty? && current_page > 1
@@ -69,7 +80,7 @@ class BooksController < ApplicationController
         has_next = false
       end
 
-      render json: {
+      response_data = {
         items: search_results[:items],
         pagination: {
           total_items: search_results[:total_items],
@@ -83,7 +94,13 @@ class BooksController < ApplicationController
           is_last_page: is_last_page
         }
       }
+      
+      Rails.logger.info "Final response data: #{response_data.inspect}"
+      
+      render json: response_data
     else
+      Rails.logger.info "Empty query, returning empty result"
+      
       render json: {
         items: [],
         pagination: {
@@ -99,6 +116,25 @@ class BooksController < ApplicationController
         }
       }
     end
+  rescue => e
+    Rails.logger.error "Error in search_external: #{e.class.name} - #{e.message}"
+    Rails.logger.error "Backtrace: #{e.backtrace.first(10).join("\n")}"
+    
+    render json: {
+      items: [],
+      pagination: {
+        total_items: 0,
+        start_index: 0,
+        items_per_page: max_results,
+        current_page: 1,
+        total_pages: 0,
+        has_next: false,
+        has_prev: false,
+        api_total_items: 0,
+        is_last_page: true
+      },
+      error: "検索中にエラーが発生しました"
+    }, status: 500
   end
 
   private

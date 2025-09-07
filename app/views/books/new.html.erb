@@ -18,7 +18,7 @@
         <h2 class="external-search-title">本を検索</h2>
         <div class="external-search-form">
             <input type="text" id="search-input" placeholder="タイトル、著者を入力して検索" class="external-search-input">
-            <button onclick="searchBooks()" class="btn btn-primary">
+            <button onclick="window.BookSearch.search()" class="btn btn-primary">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
                 </svg>
@@ -95,245 +95,229 @@
 </div>
 
 <script>
-    let currentQuery = '';
-    let currentPage = 1;
-    let totalPages = 0;
-    let isLoading = false;
+    // 名前空間を使って完全に独立したスクリプトにする
+    window.BookSearch = {
+        currentQuery: '',
+        currentPage: 1,
+        totalPages: 0,
+        isLoading: false,
 
-    async function searchBooks(page = 1) {
-        const query = document.getElementById('search-input').value.trim();
-        const resultsDiv = document.getElementById('search-results');
-        const paginationDiv = document.getElementById('search-pagination');
-        const paginationInfo = document.getElementById('pagination-info');
+        async search(page = 1) {
+            console.log('=== BookSearch.search called ===');
+            const query = document.getElementById('search-input').value.trim();
+            const resultsDiv = document.getElementById('search-results');
+            const paginationDiv = document.getElementById('search-pagination');
+            const paginationInfo = document.getElementById('pagination-info');
 
-        if (!query) {
-            resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">🔍</div><p>検索キーワードを入力してください</p></div>';
-            paginationDiv.style.display = 'none';
-            paginationInfo.style.display = 'none';
-            return;
-        }
+            console.log('Query:', query);
 
-        if (isLoading) return;
-
-        isLoading = true;
-        currentQuery = query;
-        currentPage = page;
-
-        const startIndex = (page - 1) * 10;
-
-        resultsDiv.innerHTML = '<div class="search-results-loading"><div class="loading"><div class="loading-spinner"></div>検索中...</div></div>';
-        paginationDiv.style.display = 'none';
-        paginationInfo.style.display = 'none';
-
-        try {
-            const response = await fetch(`/books/search_external?query=${encodeURIComponent(query)}&start_index=${startIndex}`);
-            const data = await response.json();
-
-            if (data.items.length === 0 && page > 1) {
-                console.log('No results found for page', page, ', going back to page', page - 1);
-                searchBooks(page - 1);
-                return;
-            }
-
-            if (data.items.length === 0 && page === 1) {
-                resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">📚</div><p>検索結果が見つかりませんでした</p></div>';
+            if (!query) {
+                resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">🔍</div><p>検索キーワードを入力してください</p></div>';
                 paginationDiv.style.display = 'none';
                 paginationInfo.style.display = 'none';
                 return;
             }
 
-            displaySearchResults(data.items);
+            if (this.isLoading) return;
 
-            totalPages = data.pagination.total_pages;
+            this.isLoading = true;
+            this.currentQuery = query;
+            this.currentPage = page;
 
-            if (data.items.length < 10 && data.pagination.current_page > 1) {
-                totalPages = data.pagination.current_page;
-                data.pagination.total_pages = totalPages;
-                data.pagination.has_next = false;
-            }
+            const startIndex = (page - 1) * 10;
 
-            displayPagination(data.pagination);
-            displayPaginationInfo(data.pagination);
-
-        } catch (error) {
-            console.error('Search error:', error);
-            resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">⚠️</div><p>検索中にエラーが発生しました</p></div>';
+            resultsDiv.innerHTML = '<div class="search-results-loading"><div class="loading"><div class="loading-spinner"></div>検索中...</div></div>';
             paginationDiv.style.display = 'none';
             paginationInfo.style.display = 'none';
-        } finally {
-            isLoading = false;
-        }
-    }
 
-    function displaySearchResults(books) {
-        const resultsDiv = document.getElementById('search-results');
+            try {
+                console.log('Fetching from API...');
+                const response = await fetch(`/books/search_external?query=${encodeURIComponent(query)}&start_index=${startIndex}`);
+                const data = await response.json();
 
-        if (books.length === 0) {
-            resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">📚</div><p>このページに結果がありません</p></div>';
-            return;
-        }
+                console.log('API Response:', data);
 
-        let html = '';
-        books.forEach(book => {
-            html += `
-                <div class="search-result" onclick="selectBook('${escapeHtml(book.title)}', '${escapeHtml(book.authors)}', '${escapeHtml(book.publisher)}', '${escapeHtml(book.cover_image)}')">
-                    <div class="search-result-content">
-                        <div class="search-result-cover">
-                            ${book.cover_image ? `<img src="${book.cover_image}" alt="${escapeHtml(book.title)}">` : '📖'}
-                        </div>
-                        <div class="search-result-info">
-                            <h3 class="search-result-title">${escapeHtml(book.title)}</h3>
-                            <p class="search-result-author">著者: ${escapeHtml(book.authors)}</p>
-                            <p class="search-result-publisher">出版社: ${escapeHtml(book.publisher)}</p>
+                if (data.items.length === 0 && page > 1) {
+                    console.log('No results found for page', page, ', going back to page', page - 1);
+                    this.search(page - 1);
+                    return;
+                }
+
+                if (data.items.length === 0 && page === 1) {
+                    resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">📚</div><p>検索結果が見つかりませんでした</p></div>';
+                    paginationDiv.style.display = 'none';
+                    paginationInfo.style.display = 'none';
+                    return;
+                }
+
+                this.displayResults(data.items);
+                this.displayPagination(data.pagination);
+                this.displayPaginationInfo(data.pagination);
+
+            } catch (error) {
+                console.error('Search error:', error);
+                resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">⚠️</div><p>検索中にエラーが発生しました</p></div>';
+                paginationDiv.style.display = 'none';
+                paginationInfo.style.display = 'none';
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        displayResults(books) {
+            console.log('=== displayResults called ===');
+            console.log('Books data:', books);
+
+            const resultsDiv = document.getElementById('search-results');
+
+            if (books.length === 0) {
+                resultsDiv.innerHTML = '<div class="search-results-empty"><div class="search-results-empty-icon">📚</div><p>このページに結果がありません</p></div>';
+                return;
+            }
+
+            let html = '';
+            books.forEach((book, index) => {
+                console.log(`Processing book ${index}:`, book);
+                console.log(`Book cover image:`, book.cover_image);
+
+                // 画像が有効かチェック
+                const hasValidImage = book.cover_image &&
+                    book.cover_image !== '' &&
+                    book.cover_image !== 'null' &&
+                    book.cover_image !== 'undefined';
+
+                console.log(`Book ${index} has valid image:`, hasValidImage);
+
+                html += `
+                    <div class="search-result" onclick="window.BookSearch.selectBook('${this.escapeHtml(book.title)}', '${this.escapeHtml(book.authors)}', '${this.escapeHtml(book.publisher)}', '${this.escapeHtml(book.cover_image || '')}')">
+                        <div class="search-result-content">
+                            <div class="search-result-cover">
+                                ${hasValidImage ? 
+                                    `<img src="${book.cover_image}" 
+                                          alt="${this.escapeHtml(book.title)}" 
+                                          style="width: 60px; height: 80px; object-fit: cover; border-radius: 4px;"
+                                          onload="console.log('✅ Image loaded:', '${book.cover_image}')"
+                                          onerror="console.error('❌ Image failed:', '${book.cover_image}'); this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                     <div style="display: none; width: 60px; height: 80px; background: #e5e7eb; border-radius: 4px; justify-content: center; align-items: center; font-size: 1.5rem;">📖</div>` : 
+                                    `<div style="width: 60px; height: 80px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">📖</div>`
+                                }
+                            </div>
+                            <div class="search-result-info">
+                                <h3 class="search-result-title">${this.escapeHtml(book.title)}</h3>
+                                <p class="search-result-author">著者: ${this.escapeHtml(book.authors)}</p>
+                                <p class="search-result-publisher">出版社: ${this.escapeHtml(book.publisher)}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-        });
+                `;
+            });
 
-        resultsDiv.innerHTML = html;
-    }
+            console.log('Setting innerHTML with HTML length:', html.length);
+            resultsDiv.innerHTML = html;
+        },
 
-    function displayPagination(pagination) {
-        const paginationDiv = document.getElementById('search-pagination');
+        displayPagination(pagination) {
+            const paginationDiv = document.getElementById('search-pagination');
 
-        if (pagination.total_pages <= 1) {
-            paginationDiv.style.display = 'none';
-            return;
-        }
-
-        let html = '';
-
-        if (pagination.has_prev) {
-            html += `<button class="pagination-btn pagination-btn-prev" onclick="searchBooks(${pagination.current_page - 1})">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                </svg>
-                前へ
-            </button>`;
-        } else {
-            html += `<button class="pagination-btn pagination-btn-prev" disabled>
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                </svg>
-                前へ
-            </button>`;
-        }
-
-        const maxVisiblePages = 5;
-        let startPage, endPage;
-
-        if (pagination.total_pages <= maxVisiblePages) {
-            startPage = 1;
-            endPage = pagination.total_pages;
-        } else {
-            const half = Math.floor(maxVisiblePages / 2);
-            startPage = Math.max(1, pagination.current_page - half);
-            endPage = Math.min(pagination.total_pages, startPage + maxVisiblePages - 1);
-
-            if (endPage - startPage + 1 < maxVisiblePages) {
-                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            if (pagination.total_pages <= 1) {
+                paginationDiv.style.display = 'none';
+                return;
             }
-        }
 
-        if (startPage > 1) {
-            html += `<button class="pagination-btn" onclick="searchBooks(1)">1</button>`;
-            if (startPage > 2) {
-                html += `<span class="pagination-ellipsis">...</span>`;
-            }
-        }
+            let html = '';
 
-        for (let i = startPage; i <= endPage; i++) {
-            if (i === pagination.current_page) {
-                html += `<button class="pagination-btn active">${i}</button>`;
+            if (pagination.has_prev) {
+                html += `<button class="pagination-btn pagination-btn-prev" onclick="window.BookSearch.search(${pagination.current_page - 1})">前へ</button>`;
             } else {
-                html += `<button class="pagination-btn" onclick="searchBooks(${i})">${i}</button>`;
+                html += `<button class="pagination-btn pagination-btn-prev" disabled>前へ</button>`;
             }
-        }
 
-        if (endPage < pagination.total_pages) {
-            if (endPage < pagination.total_pages - 1) {
-                html += `<span class="pagination-ellipsis">...</span>`;
+            for (let i = 1; i <= Math.min(pagination.total_pages, 5); i++) {
+                if (i === pagination.current_page) {
+                    html += `<button class="pagination-btn active">${i}</button>`;
+                } else {
+                    html += `<button class="pagination-btn" onclick="window.BookSearch.search(${i})">${i}</button>`;
+                }
             }
-            html += `<button class="pagination-btn" onclick="searchBooks(${pagination.total_pages})">${pagination.total_pages}</button>`;
+
+            if (pagination.has_next) {
+                html += `<button class="pagination-btn pagination-btn-next" onclick="window.BookSearch.search(${pagination.current_page + 1})">次へ</button>`;
+            } else {
+                html += `<button class="pagination-btn pagination-btn-next" disabled>次へ</button>`;
+            }
+
+            paginationDiv.innerHTML = html;
+            paginationDiv.style.display = 'flex';
+        },
+
+        displayPaginationInfo(pagination) {
+            const paginationInfo = document.getElementById('pagination-info');
+
+            if (pagination.total_items === 0) {
+                paginationInfo.style.display = 'none';
+                return;
+            }
+
+            const startItem = pagination.start_index + 1;
+            const endItem = Math.min(pagination.start_index + pagination.items_per_page, pagination.total_items);
+
+            paginationInfo.innerHTML = `${startItem}〜${endItem}件 / 全${pagination.total_items}件`;
+            paginationInfo.style.display = 'block';
+        },
+
+        selectBook(title, authors, publisher, coverImage) {
+            console.log('selectBook called with:', {
+                title,
+                authors,
+                publisher,
+                coverImage
+            });
+
+            document.getElementById('book_title').value = title;
+            document.getElementById('book_author').value = authors;
+            document.getElementById('book_publisher').value = publisher;
+            document.getElementById('book_cover_image_url').value = coverImage;
+
+            // スクロールしてフォームを表示
+            document.getElementById('book_title').scrollIntoView({
+                behavior: 'smooth'
+            });
+
+            // 選択したことを視覚的に示す
+            const selectedMessage = document.createElement('div');
+            selectedMessage.innerHTML = '✅ 本が選択されました';
+            selectedMessage.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #10b981; color: white; padding: 12px 20px; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+            document.body.appendChild(selectedMessage);
+
+            setTimeout(() => {
+                selectedMessage.remove();
+            }, 3000);
+        },
+
+        escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
+    };
 
-        if (pagination.has_next) {
-            html += `<button class="pagination-btn pagination-btn-next" onclick="searchBooks(${pagination.current_page + 1})">
-                次へ
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-                </svg>
-            </button>`;
-        } else {
-            html += `<button class="pagination-btn pagination-btn-next" disabled>
-                次へ
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-                </svg>
-            </button>`;
-        }
-
-        paginationDiv.innerHTML = html;
-        paginationDiv.style.display = 'flex';
-    }
-
-    function displayPaginationInfo(pagination) {
-        const paginationInfo = document.getElementById('pagination-info');
-
-        if (pagination.total_items === 0) {
-            paginationInfo.style.display = 'none';
-            return;
-        }
-
-        const startItem = pagination.start_index + 1;
-        const endItem = Math.min(pagination.start_index + pagination.items_per_page, pagination.total_items);
-
-        paginationInfo.innerHTML = `${startItem}〜${endItem}件 / 全${pagination.total_items}件`;
-        paginationInfo.style.display = 'block';
-    }
-
-    function selectBook(title, authors, publisher, coverImage) {
-        document.getElementById('book_title').value = title;
-        document.getElementById('book_author').value = authors;
-        document.getElementById('book_publisher').value = publisher;
-        document.getElementById('book_cover_image_url').value = coverImage;
-
-        // スクロールしてフォームを表示
-        document.getElementById('book_title').scrollIntoView({
-            behavior: 'smooth'
+    // イベントリスナーを設定
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enterキーで検索
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                window.BookSearch.search(1);
+            }
         });
 
-        // 選択したことを視覚的に示す
-        const selectedMessage = document.createElement('div');
-        selectedMessage.innerHTML = '✅ 本が選択されました';
-        selectedMessage.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #10b981; color: white; padding: 12px 20px; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
-        document.body.appendChild(selectedMessage);
-
-        setTimeout(() => {
-            selectedMessage.remove();
-        }, 3000);
-    }
-
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // Enterキーで検索
-    document.getElementById('search-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            searchBooks(1);
-        }
-    });
-
-    // 検索入力をクリアしたときの処理
-    document.getElementById('search-input').addEventListener('input', function(e) {
-        if (e.target.value.trim() === '') {
-            document.getElementById('search-results').innerHTML = '';
-            document.getElementById('search-pagination').style.display = 'none';
-            document.getElementById('pagination-info').style.display = 'none';
-        }
+        // 検索入力をクリアしたときの処理
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            if (e.target.value.trim() === '') {
+                document.getElementById('search-results').innerHTML = '';
+                document.getElementById('search-pagination').style.display = 'none';
+                document.getElementById('pagination-info').style.display = 'none';
+            }
+        });
     });
 </script>
