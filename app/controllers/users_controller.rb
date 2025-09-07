@@ -8,7 +8,6 @@ class UsersController < ApplicationController
 
     if @user.save
       session[:user_id] = @user.id
-      flash[:notice] = "アカウントが正常に作成されました"
       redirect_to books_path
     else
       render :new, status: :unprocessable_entity

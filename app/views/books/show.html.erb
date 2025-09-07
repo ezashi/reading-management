@@ -63,9 +63,7 @@
 
                 <div class="detail-actions">
                     <%= link_to "編集", edit_book_path(@book), class: "action-button primary" %>
-                    <%= button_to "削除", @book, method: :delete, 
-              data: { turbo_confirm: "本当に削除しますか？" }, 
-              class: "action-button danger" %>
+                    <%= button_to "削除", @book, method: :delete, class: "action-button danger" %>
                 </div>
             </div>
         </div>
@@ -80,7 +78,7 @@
         <% end %>
 
         <div class="related-section">
-            <h3 class="section-title">最近追加した本</h3>
+            <h3 class="section-title">最近追加した書籍</h3>
             <% recent_books = current_user.books.recent.limit(4).where.not(id: @book.id) %>
 
             <% if recent_books.any? %>
@@ -106,7 +104,7 @@
                 <% end %>
             </div>
             <% else %>
-            <p class="no-related">他に本がありません</p>
+            <p class="no-related">他に書籍がありません</p>
             <% end %>
         </div>
     </div>

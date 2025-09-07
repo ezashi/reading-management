@@ -7,7 +7,6 @@ class SessionsController < ApplicationController
 
     if user && user.authenticate(params[:password])
       session[:user_id] = user.id
-      flash[:notice] = "ログインしました"
       redirect_to books_path
     else
       flash.now[:alert] = "ユーザー名/メールアドレスまたはパスワードが正しくありません"
@@ -17,7 +16,6 @@ class SessionsController < ApplicationController
 
   def destroy
     session[:user_id] = nil
-    flash[:notice] = "ログアウトしました"
     redirect_to login_path
   end
 end

@@ -19,7 +19,6 @@ class BooksController < ApplicationController
     @book = current_user.books.build(book_params)
 
     if @book.save
-      flash[:notice] = "本を追加しました"
       redirect_to @book
     else
       render :new, status: :unprocessable_entity
@@ -31,7 +30,6 @@ class BooksController < ApplicationController
 
   def update
     if @book.update(book_params)
-      flash[:notice] = "本の情報を更新しました"
       redirect_to @book
     else
       render :edit, status: :unprocessable_entity
@@ -40,7 +38,6 @@ class BooksController < ApplicationController
 
   def destroy
     @book.destroy
-    flash[:notice] = "本を削除しました"
     redirect_to books_path
   end
 
@@ -133,8 +130,7 @@ class BooksController < ApplicationController
         return
       end
 
-      has_next = collected_items.length == max_results &&
-                 start_index + max_results < effective_total_items
+      has_next = collected_items.length == max_results && start_index + max_results < effective_total_items
       has_prev = current_page > 1
 
       response_data = {

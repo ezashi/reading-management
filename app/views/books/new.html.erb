@@ -1,4 +1,4 @@
-<% content_for :title, "本を追加" %>
+<% content_for :title, "書籍を追加" %>
 
 <div class="add-book-container">
     <div class="back-navigation">
@@ -7,34 +7,15 @@
         <% end %>
     </div>
 
-    <h1 class="page-title">新しい本を追加</h1>
+    <h1 class="page-title">新しい書籍を追加</h1>
 
     <div class="search-section">
         <div class="search-card">
-            <h2 class="section-title">本を検索</h2>
-
-            <div class="search-tips">
-                <p class="tips-title">検索のコツ:</p>
-                <ul>
-                    <li>「"ハリー・ポッター"」のように引用符で囲むと完全一致検索</li>
-                    <li>「村上春樹 ノルウェイ」のように著者名と作品名を組み合わせる</li>
-                    <li>「Ruby プログラミング」のようにジャンルとキーワードを組み合わせる</li>
-                </ul>
-            </div>
+            <h2 class="section-title">書籍を検索</h2>
 
             <div class="search-form">
-                <input type="text" id="search-input" placeholder="本のタイトル、著者名等のキーワードを入力してください" class="search-input">
+                <input type="text" id="search-input" placeholder="書籍のタイトル、著者名等のキーワードを入力してください" class="search-input">
                 <button onclick="BookSearch.search(1)" class="search-button">検索</button>
-            </div>
-
-            <div class="search-examples">
-                <p>人気の検索例:</p>
-                <div class="example-buttons">
-                    <button onclick="BookSearch.searchExample('ハリー・ポッター')" class="example-button">ハリー・ポッター</button>
-                    <button onclick="BookSearch.searchExample('村上春樹')" class="example-button">村上春樹</button>
-                    <button onclick="BookSearch.searchExample('鬼滅の刃')" class="example-button">鬼滅の刃</button>
-                    <button onclick="BookSearch.searchExample('Python プログラミング')" class="example-button">Python入門</button>
-                </div>
             </div>
 
             <div id="search-results" class="search-results"></div>
@@ -81,13 +62,13 @@
             <div class="form-group">
                 <%= form.label :rating, "評価", class: "form-label" %>
                 <%= form.select :rating, options_for_select([
-            ['未評価', nil],
-            ['★☆☆☆☆ (1)', 1],
-            ['★★☆☆☆ (2)', 2],
-            ['★★★☆☆ (3)', 3],
-            ['★★★★☆ (4)', 4],
-            ['★★★★★ (5)', 5]
-          ]), {}, { class: "form-select" } %>
+                    ['未評価', nil],
+                    ['★☆☆☆☆ (1)', 1],
+                    ['★★☆☆☆ (2)', 2],
+                    ['★★★☆☆ (3)', 3],
+                    ['★★★★☆ (4)', 4],
+                    ['★★★★★ (5)', 5]
+                ]), {}, { class: "form-select" } %>
             </div>
 
             <div class="form-group">
@@ -249,7 +230,7 @@
                 });
 
                 const message = document.createElement('div');
-                message.innerHTML = '✅ 本が選択されました';
+                message.innerHTML = '✅ 書籍が選択されました';
                 message.className = 'selection-message';
                 document.body.appendChild(message);
 

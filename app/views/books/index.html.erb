@@ -3,7 +3,7 @@
 <div class="library-container">
     <section class="hero-section">
         <h1 class="hero-title">あなたの読書記録</h1>
-        <p class="hero-subtitle">読んだ本を記録して、感想やメモを保存しましょう。</p>
+        <p class="hero-subtitle">読んだ書籍を記録して、感想やメモを保存しましょう。</p>
 
         <div class="stats-container">
             <div class="stat-card">
@@ -28,7 +28,7 @@
     <section class="search-section">
         <%= form_with url: books_path, method: :get, local: true, class: "search-form" do |form| %>
         <div class="search-input-group">
-            <%= form.text_field :search, value: @search_query, placeholder: "本のタイトルで検索", class: "search-input" %>
+            <%= form.text_field :search, value: @search_query, placeholder: "書籍のタイトルで検索", class: "search-input" %>
         </div>
         <%= form.submit "検索", class: "search-button" %>
         <% if @search_query.present? %>
@@ -74,21 +74,15 @@
                     <% if book.author.present? %>
                     <p class="book-author"><%= book.author %></p>
                     <% end %>
-                    <% if book.publisher.present? %>
-                    <p class="book-publisher"><%= book.publisher %></p>
-                    <% end %>
-                    <% if book.memo.present? %>
-                    <p class="book-memo"><%= truncate(book.memo, length: 80) %></p>
-                    <% end %>
                 </div>
             </div>
             <% end %>
         </div>
         <% else %>
         <div class="empty-state">
-            <h3 class="empty-title">まだ本が登録されていません</h3>
-            <p class="empty-description">最初の本を追加して、読書記録を始めましょう！</p>
-            <%= link_to "本を追加", new_book_path, class: "add-button" %>
+            <h3 class="empty-title">まだ書籍が登録されていません</h3>
+            <p class="empty-description">最初の書籍を追加して、読書記録を始めましょう！</p>
+            <%= link_to "書籍を追加", new_book_path, class: "add-button" %>
         </div>
         <% end %>
     </section>
